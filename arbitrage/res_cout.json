@@ -1,0 +1,39 @@
+{
+  "secondes_demarrage": 2.35,
+  "ms_premiere_question": 27.6,
+  "ms_mediane": 23.11,
+  "ms_p95": 27.66,
+  "ms_max": 42.76,
+  "ms_produit_scalaire_mediane": 0.035,
+  "ms_produit_scalaire_max": 0.116,
+  "octets_matrice": 1806336,
+  "forme_matrice": [
+    588,
+    768
+  ],
+  "memoire": {
+    "processus neuf": [
+      17.1,
+      17.1
+    ],
+    "corpus et jeu chargés": [
+      19.1,
+      21.5
+    ],
+    "index prêt (cache relu)": [
+      586.5,
+      868.3
+    ],
+    "64 questions servies": [
+      595.1,
+      868.3
+    ]
+  },
+  "disque_mo": {
+    "paquets Python (site-packages du .venv)": 161.3,
+    "modèle embeddinggemma-300m (ONNX)": 1198.3,
+    "index vectoriel sérialisé (.npy)": 1.7,
+    "corpus JSON": 0.9,
+    "bras lexical (code, zéro dépendance)": 0.0
+  }
+}

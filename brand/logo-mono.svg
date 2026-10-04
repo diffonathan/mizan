@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"
+     role="img" aria-label="Mizan">
+  <title>Mizan</title>
+  <desc>Le fléau de balance, en une seule couleur héritée du texte environnant.</desc>
+
+  <!-- ══ Une GÉOMÉTRIE PROPRE, et non la version couleur dépouillée ═══════
+
+       En couleur, le plateau d'or se distingue du blanc, et le cadre violet
+       sépare les formes du fond. Ici il n'y a plus qu'une teinte : tout ce
+       qui portait la différence a disparu, et les formes doivent s'écarter
+       davantage sous peine de se souder.
+
+       Deux changements, mesurés :
+         • le cadre plein devient un CONTOUR évidé de 5 unités. Un carré
+           plein obligerait à évider les formes en négatif, ce qui ne tient
+           pas à 16 px ;
+         • les plateaux descendent de 33 à 35, ce qui porte le vide avec le
+           fléau de 6 à 8 unités.
+
+       Le plateau de droite garde sa distinction par la FORME — un anneau
+       plutôt qu'un disque — puisqu'il ne peut plus la tenir de la couleur.
+       C'est la seule façon de conserver le sens du symbole en monochrome. -->
+
+  <rect x="2.5" y="2.5" width="59" height="59" rx="13" fill="none"
+        stroke="currentColor" stroke-width="5"/>
+
+  <rect x="15" y="19" width="34" height="4.5" rx="2.25" fill="currentColor"/>
+  <rect x="29.75" y="19" width="4.5" height="22" rx="2.25" fill="currentColor"/>
+  <rect x="20" y="41" width="24" height="4.5" rx="2.25" fill="currentColor"/>
+
+  <!-- Plein à gauche : la question. -->
+  <circle cx="17.5" cy="33" r="4.5" fill="currentColor"/>
+
+  <!-- Évidé à droite : l'article. La différence passe de la couleur à la
+       forme, parce qu'en monochrome il n'y a plus de couleur à donner. -->
+  <circle cx="46.5" cy="33" r="4.5" fill="none" stroke="currentColor" stroke-width="3"/>
+</svg>

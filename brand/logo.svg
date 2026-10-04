@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"
+     role="img" aria-label="Mizan">
+  <title>Mizan</title>
+  <desc>Un fléau de balance en équilibre. Le plateau de gauche porte la question, celui de droite — en or — porte l'article qui la soutient. L'équilibre dit qu'une réponse ne vaut que par sa source.</desc>
+
+  <defs>
+    <!-- Violet profond #7c3aed de la charte, en dégradé léger pour donner du
+         volume. Direction reprise de --grad-accent : clair en bas, sombre en
+         haut, comme une surface creuse éclairée par le dessus. -->
+    <linearGradient id="fond" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#b793f5"/>
+      <stop offset="1" stop-color="#612db9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="15" fill="url(#fond)"/>
+
+  <!-- ══ Géométrie, et pourquoi ces nombres ═══════════════════════════════
+
+       Toutes les formes font 5 unités d'épaisseur ou 10 de diamètre, soit
+       1,25 px et 2,5 px à la taille d'un onglet. Le plancher maison est de
+       3 unités.
+
+       Mais l'épaisseur ne suffit pas : une première version plaçait les
+       plateaux à 0,5 unité du fléau. Chaque pièce était assez épaisse, et
+       pourtant l'ensemble se soudait en une tache à 16 px, parce que c'est le
+       VIDE entre les formes qui décide de la lisibilité, pas leur taille.
+
+       Les écarts ont donc été mesurés comme les épaisseurs :
+         fléau → plateau : 6 unités
+         mât → plateau   : 10 unités
+         plateau → socle : 4 unités (axe vertical, moins critique : rien ne
+                           s'y confond, le socle étant plein largeur)
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Le fléau. C'est la pièce qui porte le sens, et il est DROIT : en
+       équilibre. Penché, il dirait l'injustice — le contraire du propos. -->
+  <rect x="12" y="17" width="40" height="5" rx="2.5" fill="#FFFFFF"/>
+
+  <!-- Le mât. 5 unités isolées seraient trop fines, mais il est soudé au
+       fléau et au socle : il se lit comme une masse, pas comme une ligne. -->
+  <rect x="29.5" y="17" width="5" height="25" rx="2.5" fill="#FFFFFF"/>
+
+  <!-- Le socle. Sans lui, fléau et mât composent une croix — et une croix
+       dans un carré arrondi se lit comme un symbole médical. -->
+  <rect x="18" y="42" width="28" height="5" rx="2.5" fill="#FFFFFF"/>
+
+  <!-- Les plateaux, réduits à des disques. Une coupe dessinée devient une
+       tache à 16 px : seules la position et la couleur survivent, et ce sont
+       elles qui portent l'information. La suspension n'est pas tracée — un
+       trait de 2 unités disparaîtrait, et son absence ne gêne pas la lecture. -->
+  <circle cx="14.5" cy="33" r="5" fill="#FFFFFF"/>
+
+  <!-- Le plateau de droite est EN OR, et c'est toute l'idée.
+       L'or est le rôle « valeur » de la charte maison ; dans ce projet il
+       porte les citations d'articles. Le symbole dit donc : une réponse (à
+       gauche) ne tient que si un article la contrebalance (à droite). -->
+  <circle cx="49.5" cy="33" r="5" fill="#f9a825"/>
+</svg>

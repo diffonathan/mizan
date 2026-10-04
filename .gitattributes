@@ -1,0 +1,31 @@
+# Fins de ligne normalisées en LF dans le dépôt.
+#
+# Sans cette règle, un dépôt créé depuis Windows stocke des CRLF, et la
+# première personne qui le clone sous Linux ou macOS voit les 187 fichiers
+# marqués comme modifiés sans avoir rien touché. Les différences deviennent
+# illisibles, et l'on finit par committer du bruit.
+#
+# `text=auto` laisse Git décider ce qui est du texte ; `eol=lf` fixe ce qui
+# est écrit DANS le dépôt. Les postes Windows continuent de voir des CRLF
+# dans leur copie de travail.
+* text=auto eol=lf
+
+# Fichiers binaires : jamais convertis, jamais diffés comme du texte.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Le schéma GraphQL est produit par le serveur, mais VERSIONNÉ exprès : un
+# champ nouvellement exposé doit se voir dans une revue de code. On le marque
+# comme généré pour que GitHub le replie par défaut, sans l'exclure des
+# différences — c'est justement là qu'on veut le lire.
+api/schema.graphql linguist-generated=true
+
+# Les fichiers de verrouillage encombrent les différences sans jamais être
+# relus à la main.
+package-lock.json linguist-generated=true

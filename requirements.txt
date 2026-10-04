@@ -1,0 +1,54 @@
+# Dépendances de Mizan, épinglées aux versions réellement mesurées.
+#
+# ── Pourquoi un seul fichier pour deux usages ───────────────────────────────
+# L'extraction du corpus n'a besoin que de PyMuPDF, et tourne donc avec un
+# interpréteur nu. La récupération vectorielle a besoin de fastembed et de son
+# moteur ONNX — presque tout le poids. Les séparer en deux fichiers aurait
+# obligé à expliquer lequel installer quand, pour une économie de deux
+# minutes à l'installation.
+#
+# ── Les versions sont ÉPINGLÉES, et c'est le sujet ──────────────────────────
+# Tous les chiffres de rappel publiés dans CONCEPTION.md dépendent du modèle
+# de plongement et de la façon dont ONNX le fait tourner. Une montée de
+# version de fastembed ou d'onnxruntime peut déplacer les vecteurs — donc les
+# rappels — sans qu'une seule ligne de code ait changé.
+#
+# Un dossier qui publie « 84,5 % au rang 3 » sans épingler ce qui produit ce
+# nombre publie une impression. C'est précisément le défaut qu'une revue de
+# reproductibilité a relevé sur ce projet : les mesures existaient, la recette
+# pour les refaire non.
+#
+#   python -m venv .venv
+#   .venv\Scripts\activate          (Windows)   ou   source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# Mesuré avec Python 3.12.10.
+
+# ── Extraction du corpus ────────────────────────────────────────────────────
+# Le découpage des 589 articles repose sur les TAILLES DE POLICE du PDF, que
+# seule une bibliothèque donnant accès à la typographie permet de lire. Une
+# extraction en texte brut perdrait la hiérarchie et les pieds de page, et le
+# script refuse d'ailleurs un PDF dont les tailles diffèrent.
+pymupdf==1.28.2
+
+# ── Récupération vectorielle ────────────────────────────────────────────────
+# fastembed plutôt que sentence-transformers : il tourne sur ONNX et n'entraîne
+# pas PyTorch, soit environ deux gigaoctets de moins pour un corpus de
+# 589 articles. Le choix est argumenté dans CONCEPTION.md.
+fastembed==0.8.1
+onnxruntime==1.30.0
+tokenizers==0.23.2
+huggingface_hub==1.33.0
+numpy==2.5.3
+
+# ── Ce que ce fichier n'installe PAS, et qu'il faut savoir ──────────────────
+#
+# LE MODÈLE DE PLONGEMENT. fastembed le télécharge au premier usage —
+# plusieurs centaines de mégaoctets, exclus du dépôt par .gitignore. Prévoir
+# le téléchargement, et une indexation à froid de l'ordre de quinze minutes.
+#
+# LE CACHE DE VECTEURS. Les mesures de rappel publiées sont calculées sur un
+# cache de 13 Mo qui n'est pas versionné : sur un clone, la première exécution
+# le reconstruit. Les RAPPELS seront identiques — ils ne dépendent que du
+# modèle et du corpus — mais les DURÉES publiées, elles, supposent le cache
+# déjà présent. CONCEPTION.md le dit à l'endroit où il donne ces durées.

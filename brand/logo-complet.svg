@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 64" width="210" height="64"
+     role="img" aria-label="Mizan — assistant du droit du travail marocain">
+  <title>Mizan</title>
+  <desc>Le symbole suivi du nom. Destiné à un en-tête web où DM Sans est chargée.</desc>
+
+  <defs>
+    <linearGradient id="fondComplet" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#b793f5"/>
+      <stop offset="1" stop-color="#612db9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="15" fill="url(#fondComplet)"/>
+  <rect x="12" y="17" width="40" height="5" rx="2.5" fill="#FFFFFF"/>
+  <rect x="29.5" y="17" width="5" height="25" rx="2.5" fill="#FFFFFF"/>
+  <rect x="18" y="42" width="28" height="5" rx="2.5" fill="#FFFFFF"/>
+  <circle cx="14.5" cy="33" r="5" fill="#FFFFFF"/>
+  <circle cx="49.5" cy="33" r="5" fill="#f9a825"/>
+
+  <!-- Le nom. Ce fichier EXIGE que DM Sans soit chargée par la page : c'est
+       pour cela qu'il est séparé de logo.svg, qui n'emploie aucune police et
+       se rend donc à l'identique partout. Un logo dont le nom change de
+       dessin selon la machine n'est pas un logo. -->
+  <text x="80" y="40" font-family="'DM Sans', system-ui, sans-serif"
+        font-size="27" font-weight="600" fill="currentColor">Mizan</text>
+</svg>

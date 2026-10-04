@@ -1,0 +1,58 @@
+# ══ Ce qui ne doit JAMAIS être publié ══════════════════════════════════════
+#
+# Mesuré avant d'écrire ce fichier : le projet pesait 4,2 Go, dont 4,1 Go de
+# modèles ONNX téléchargés par les prototypes vectoriels — un seul en fait
+# 2,1 Go. Un dépôt dans cet état ne se clone pas, et GitHub refuse d'ailleurs
+# les fichiers de plus de 100 Mo.
+#
+# Les modèles se retéléchargent d'eux-mêmes au premier lancement. Les
+# versionner reviendrait à publier une copie d'un artefact public, au prix
+# d'un dépôt inutilisable.
+
+# Caches de modèles — 4,1 Go mesurés.
+**/.cache_modeles/
+**/.cache/
+**/models--*/
+
+# Environnements virtuels Python.
+.venv/
+venv/
+**/.venv/
+env/
+
+# Octets compilés et caches d'outils.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Vecteurs calculés. Ils dérivent du corpus et du modèle : les versionner
+# créerait une troisième source de vérité qui dériverait des deux autres sans
+# que rien ne le signale.
+*.npy
+*.npz
+*.faiss
+*.index
+
+# Secrets. La convention du projet est LLM_PROVIDER / LLM_API_KEY / LLM_MODEL.
+.env
+.env.local
+.env.*.local
+
+# ══ Ce qui EST versionné, et pourquoi ══════════════════════════════════════
+#
+# corpus/source/code-travail-adala.pdf — 1,5 Mo, conservé exprès.
+#
+# C'est la seule façon de rendre l'extraction reproductible : un portail
+# gouvernemental peut changer d'adresse, republier une autre version, ou
+# simplement tomber. Sans le PDF, « relancez extraire.py » devient une
+# instruction qu'on ne peut plus suivre, et tous les chiffres du dossier
+# deviennent invérifiables.
+#
+# 1,5 Mo est le prix de la reproductibilité. Les 4,1 Go de modèles, non :
+# eux se retéléchargent à l'identique depuis une adresse stable.
+
+.DS_Store
+Thumbs.db
+*.log

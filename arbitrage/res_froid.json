@@ -1,0 +1,27 @@
+{
+  "modele": "google/embeddinggemma-300m",
+  "empreinte_corpus": "736c1955dc79c707",
+  "passages": 588,
+  "secondes_indexation": 1075.4,
+  "pic_memoire_mo": 9361.1,
+  "mesures_de_temps_relues": true,
+  "forme": [
+    588,
+    768
+  ],
+  "ecart_max_avec_cache": 0.01236589252948761,
+  "composante_moyenne": 0.02839663252234459,
+  "rappels": {
+    "cache": [
+      0.6111,
+      0.845,
+      0.8801
+    ],
+    "froid": [
+      0.6111,
+      0.845,
+      0.8801
+    ]
+  },
+  "questions_deplacees": []
+}
