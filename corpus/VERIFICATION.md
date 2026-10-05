@@ -5,10 +5,13 @@ tout seul, ce qu'il a **trouvé**, et ce qu'il **ne peut pas contrôler**. La
 troisième partie est la plus importante. Un assistant juridique qui ne sait pas
 dire où s'arrête sa garantie est un assistant dangereux.
 
-Tous les nombres ci-dessous viennent d'une exécution de `python extraire.py`
-ou de `python extraire.py --contre-verifier`, dont les sorties sont reproduites
-plus bas. Aucun n'est estimé. Les six sabotages du § 1 sont là pour qu'on
-puisse vérifier que les contrôles mordent, sans avoir à nous croire.
+Tous les nombres ci-dessous viennent d'une exécution de `python extraire.py`,
+de `python extraire.py --statistiques` ou de `python extraire.py
+--contre-verifier`, dont les sorties sont reproduites plus bas. Aucun n'est
+estimé, et aucun n'est une durée : ce sont des comptages, que le même PDF
+redonne à l'identique sur n'importe quelle machine. Les six sabotages du § 1
+sont là pour qu'on puisse vérifier que les contrôles mordent, sans avoir à nous
+croire.
 
 ---
 
@@ -108,7 +111,20 @@ ecrit              code-travail.json (958194 octets)
   conservées : 135 intitulés en tout.
 - **Article le plus court** : 468, 70 caractères (« Les membres du comité
   d'entreprise sont tenus au secret professionnel. »). **Le plus long** : 586,
-  5 802 caractères. **Médiane** : 390 caractères.
+  5 802 caractères et 55 alinéas. **Médiane** : 390 caractères, prise sur les
+  588 articles non vides — l'article 256, abrogé, n'est pas une longueur
+  d'article. Ces quatre valeurs sont imprimées par
+  `python extraire.py --statistiques` ; elles ne sont pas comptées à la main.
+
+  ```
+  $ python extraire.py --statistiques
+  statistiques de forme des articles
+    articles non vides           588 (l'article 256, abroge, est vide)
+    longueur mediane             390 caracteres
+    plus court                   article 468, 70 caracteres
+    plus long                    article 586, 5802 caracteres, 55 alineas
+  ```
+
 - **Une seule note orpheline** : la note 1, dont l'appel est page 2, dans le
   dahir de promulgation — avant le premier « Livre » où commence le corpus. Elle
   renvoie au Bulletin Officiel de la loi entière, pas à un article. Le champ
@@ -176,7 +192,7 @@ une seconde source du Code du travail pour comparer, et nous n'en avons pas.
 Voici donc, précisément, ce qui a été vérifié autrement — et ce qui reste un
 acte de foi.
 
-### 3.1 Relecture à la main : 20 articles sur 589
+### 3.1 Relecture à la main d'un échantillon
 
 Comparés mot à mot, à l'œil, avec les pages correspondantes du PDF :
 
@@ -204,7 +220,7 @@ Ils n'ont pas été tirés au hasard. Chacun éprouve un piège précis :
 Les **135 intitulés** de la hiérarchie ont également été relus un par un contre
 l'inventaire des lignes en gras du PDF.
 
-### 3.2 Contre-vérification automatique des 588 autres
+### 3.2 Contre-vérification automatique de tous les autres
 
 Relire 589 articles à la main n'était pas possible. À la place, une
 **contre-vérification par un chemin indépendant**, rejouable :
@@ -317,12 +333,23 @@ Bulletin Officiel. Les deux chemins lisent le même fichier.
 cd mizan/corpus
 python extraire.py                   # extrait, contrôle, écrit code-travail.json
 python extraire.py --sans-ecrire     # contrôle sans rien écrire
+python extraire.py --statistiques    # ajoute les longueurs d'article du § 2
 python extraire.py --contre-verifier # ajoute la contre-vérification du § 3.2
 echo $?                              # 0 si tous les contrôles passent, 1 sinon
 ```
 
-La contre-vérification relit le PDF une seconde fois, ce qui se paie peu :
-1,43 s pour `--sans-ecrire`, 1,58 s en y ajoutant `--contre-verifier`.
+La contre-vérification relit le PDF une seconde fois, ce qui se paie peu : par
+construction, le surcoût est celui d'une seconde lecture du même fichier, et
+l'ensemble reste de l'ordre de la seconde sur une machine de bureau.
+
+**Aucune durée n'est publiée ici en valeur exacte, et c'est voulu.** Une version
+précédente de ce paragraphe annonçait « 1,43 s » et « 1,58 s ». Un rejeu du même
+code, sur la même machine, les a retrouvées plus de deux fois plus basses : la
+charge de la machine avait changé, pas l'extraction. Une durée mesurée une fois
+sur un poste partagé n'est pas un fait que le lecteur peut contredire, et la
+remplacer par une mesure fraîche ne ferait que reposer un chiffre qui dérivera
+au prochain rejeu. L'ordre de grandeur, lui, se reproduit partout, et c'est la
+seule chose que ce paragraphe avait à dire.
 
 Dépendance unique : **PyMuPDF** (importé sous le nom `pymupdf` ; `fitz` est son
 ancien nom, déprécié). Aucune clé d'API, aucun modèle de langage, aucun accès

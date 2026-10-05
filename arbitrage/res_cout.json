@@ -1,11 +1,11 @@
 {
-  "secondes_demarrage": 2.35,
-  "ms_premiere_question": 27.6,
-  "ms_mediane": 23.11,
-  "ms_p95": 27.66,
-  "ms_max": 42.76,
-  "ms_produit_scalaire_mediane": 0.035,
-  "ms_produit_scalaire_max": 0.116,
+  "secondes_demarrage": 2.1,
+  "ms_premiere_question": 42.1,
+  "ms_mediane": 23.23,
+  "ms_p95": 27.98,
+  "ms_max": 31.74,
+  "ms_produit_scalaire_mediane": 0.037,
+  "ms_produit_scalaire_max": 0.171,
   "octets_matrice": 1806336,
   "forme_matrice": [
     588,
@@ -13,20 +13,20 @@
   ],
   "memoire": {
     "processus neuf": [
-      17.1,
-      17.1
+      18.2,
+      18.7
     ],
     "corpus et jeu chargés": [
-      19.1,
-      21.5
+      19.9,
+      22.6
     ],
     "index prêt (cache relu)": [
-      586.5,
-      868.3
+      585.3,
+      867.7
     ],
     "64 questions servies": [
-      595.1,
-      868.3
+      594.2,
+      867.7
     ]
   },
   "disque_mo": {

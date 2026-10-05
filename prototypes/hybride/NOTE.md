@@ -1,12 +1,30 @@
 # Mizan — piste « combinaison lexical + dense, fusion par rang réciproque »
 
-Prototype jetable. Aucun fichier de ce dossier n'est destiné à la production.
-Tous les nombres de cette note viennent d'exécutions faites le 4 octobre 2026
-sur cette machine ; la commande qui les reproduit est donnée à chaque fois.
-Là où je n'ai pas mesuré, je l'écris. Deux chiffres font exception et sont
-signalés comme tels à l'endroit où ils apparaissent (§4, avertissement sur
-les temps) : ils viennent d'un script qui n'a pas été conservé et ne sont
-donc pas rejouables.
+Prototype jetable, et **écarté**. Aucun fichier de ce dossier n'est destiné
+à la production. Cette note n'a pas pour but de dire combien de
+millisecondes coûtait la fusion un jour d'octobre 2026 : elle doit dire
+**pourquoi la piste a été écartée**, de façon que l'argument tienne encore
+quand la machine aura changé.
+
+**Règle d'écriture des chiffres**, appliquée partout dans ce qui suit.
+
+- Ce qui se reproduit à l'identique chez qui clone le dépôt et lance la
+  commande — rappels, comptages, rangs, tailles de fichier — est publié
+  comme un nombre, avec la commande qui le produit.
+- Ce qui dépend de la machine et de sa charge — durées, mémoire, débits —
+  n'est **pas** publié comme un point. Pour la seule construction de l'index
+  dense, dont le code n'a pas changé d'une ligne, une version précédente de
+  cette note publiait 45 975 ms ; deux rejeux de `banc.py` donnent 15,2 s et
+  15,5 s. Republier l'un de ces nombres, ce serait reposer un chiffre qui
+  dérivera au prochain rejeu, et la même remarque reviendrait dans trois
+  mois. Ces grandeurs sont donc données en **ordre de grandeur**, en
+  **rapport** ou en **intervalle observé**, et jamais au dixième.
+- Là où je n'ai pas mesuré, je l'écris.
+
+Deux durées font exception et sont citées telles quelles, parce qu'elles
+disent l'ampleur d'un problème : elles sont signalées en gras à l'endroit où
+elles apparaissent (§4) comme **non rejouables et à ne pas citer** — aucune
+commande de ce dépôt ne les reproduit.
 
 ---
 
@@ -60,12 +78,30 @@ gonflerait les trois chiffres sans rien prouver de plus.
 
 **Commande :** celle du §1 (`banc.py`, sans `--rapide`) → `resultats_banc.json`
 
-| | rappel@1 | rappel@3 | rappel@5 | ms/requête (médiane) |
-|---|---|---|---|---|
-| bras lexical seul (BM25) | **0,36** | 0,48 | 0,52 | 0,32 |
-| bras dense seul | 0,16 | 0,52 | 0,56 | 17,07 |
-| **fusion RRF, k=60** | 0,32 | 0,52 | **0,64** | 17,95 |
-| plafond d'un oracle qui choisirait le bon bras | 0,40 | 0,68 | 0,76 | — |
+| | rappel@1 | rappel@3 | rappel@5 |
+|---|---|---|---|
+| bras lexical seul (BM25) | **0,36** | 0,48 | 0,52 |
+| bras dense seul | 0,16 | 0,52 | 0,56 |
+| **fusion RRF, k=60** | 0,32 | 0,52 | **0,64** |
+| plafond d'un oracle qui choisirait le bon bras | 0,40 | 0,68 | 0,76 |
+
+Ces douze rappels sont déterministes : ils sortent identiques de chaque
+exécution et se relisent dans `resultats_banc.json`, champs `resultats.*` et
+`ablations.plafond_oracle_choix_du_bras`.
+
+**Ce tableau n'a plus de colonne « ms/requête ».** Il en avait une, et elle
+contredisait le §4 du même document : on y lisait 0,32 / 17,07 / 17,95 là où
+le §4 chiffrait 0,13 et 17,74 pour deux des trois mêmes mesures. Un document
+qui se contredit lui-même ne se répare pas en corrigeant un côté, alors
+voici la décision : **le §4 fait foi pour tout ce qui est coût**, et il n'y
+parle qu'en ordres de grandeur. `banc.py` imprime toujours cette médiane,
+mais cette note ne la republie plus comme un nombre.
+
+Ce qu'il faut retenir du coût ici, et qui tient sur n'importe quelle
+machine : **une requête du bras lexical coûte un à deux ordres de grandeur
+moins qu'une requête du bras dense** — le rapport entre les deux a été
+mesuré entre 40 et 55 selon l'exécution — et la fusion coûte ce que coûte le
+bras dense, à quelques pour cent près. C'est tout ce dont la suite a besoin.
 
 Il faut lire ce tableau dans cet ordre :
 
@@ -74,7 +110,14 @@ Il faut lire ce tableau dans cet ordre :
    articles cités plutôt qu'un seul.
 2. **La fusion PERD du rappel@1** : 0,32 contre 0,36 pour BM25 seul. Sur 25
    questions, la fusion dégrade le rang de l'article attendu dans **11 cas**
-   et l'améliore dans **5** (9 inchangés ; liste produite par `banc.py`).
+   et l'améliore dans **5** (9 inchangés). `banc.py` imprime la liste sous
+   « ce que la fusion a gagné ou perdu par rapport à chaque bras » ; le
+   comptage, lui, se refait sur le JSON — ces trois nombres sont
+   déterministes :
+
+   ```sh
+   python -c "import json; d=json.load(open('resultats_banc.json',encoding='utf-8')); I=10**6; c=[(min(q['rang_lexical'] or I, q['rang_dense'] or I), q['rang_fusion'] or I) for q in d['detail']]; print('degrade', sum(f>b for b,f in c), 'ameliore', sum(f<b for b,f in c), 'inchange', sum(f==b for b,f in c))"
+   ```
 3. **Le plafond de l'oracle est 0,76 @5.** Aucune fusion de ces deux bras ne
    dépassera ça. L'écart 0,64 → 0,76 est ce que la fusion laisse sur la
    table ; l'écart 0,76 → 1,00 est ce que les *bras* ne savent pas trouver,
@@ -130,11 +173,22 @@ chiffres.
 
 ### Un troisième bras gratuit n'apporte rien à RRF
 
-Bras C : BM25 sur tranches de 4 caractères. Zéro paquet, **317 ms**
-d'indexation — dernière ligne du tableau d'ablations de `banc.py`.
-(Une version précédente de cette note écrivait 465 ms, mesurés lors d'une
-autre exécution ; comme tous les temps du §4, celui-ci dépend de la charge de
-la machine. Les rappels ci-dessous, eux, ne bougent pas.)
+Bras C : BM25 sur tranches de 4 caractères. **Zéro paquet**, et une
+indexation d'une **fraction de seconde** — du même ordre que celle du bras
+lexical, c'est-à-dire négligeable devant celle du bras dense. `banc.py`
+l'imprime en dernière ligne de ses ablations, sous « indexation du bras
+caracteres » (champ `ablations._indexation_caracteres_ms` du JSON).
+
+Aucune valeur n'est donnée ici, et c'est le fait marquant : les versions
+successives de cette note ont publié, pour cette unique mesure, **465 ms,
+puis 317 ms, puis 140,5 ms, puis 125,6 ms**. Quatre nombres pour la même
+opération, dont le code n'a pas bougé d'une ligne entre-temps. **C'est la
+dispersion qui est l'information, pas le dernier tirage en date** — et ce
+qu'elle dit suffit à l'argument de ce paragraphe : **ce bras ne coûte rien
+devant le bras dense**. Dans l'absolu, un quart de seconde n'est pas rien ; c'est
+devant les dizaines de secondes du §4 que ça l'est, et c'est la seule forme sous
+laquelle cette phrase est vraie.
+Les rappels ci-dessous, eux, ne bougent pas d'une exécution à l'autre.
 
 | | @1 | @3 | @5 |
 |---|---|---|---|
@@ -254,27 +308,76 @@ Commande : `pip install --target ./paquets fastembed`, puis `du -sm`.
 | dont fastembed | 2 Mo |
 | dont py-rust-stemmers *(seul paquet du bras lexical)* | 1 Mo |
 
-**Modèle** : `qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q`,
-**255 Mo** sur disque, dont `model_optimized.onnx` 224,2 Mo,
-`tokenizer.json` 16,3 Mo, `unigram.json` 14,1 Mo.
+**Modèle** : `qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q`, **241 Mo**
+sur disque — `du -sm` sur le dossier de snapshot que le §1 nomme, donc des
+mébioctets — dont `model_optimized.onnx` 224,2 et `tokenizer.json` 16,3 dans la
+même unité ; les trois fichiers restants du snapshot sont des JSON de
+configuration de quelques kilo-octets, et le total est bien la somme des deux
+premiers.
 
-Tout ce tableau vient de la dernière exécution de `banc.py` (sauf la
-ligne « disque », mesurée au `du -sm` indiqué au-dessus) :
+Cette note a publié **255 Mo**, en additionnant un troisième fichier,
+`unigram.json` (14,1 Mo), **qui n'existe nulle part** : ni dans ce snapshot, ni
+ailleurs dans le cache de modèles que le §1 désigne comme la source de tous les
+chiffres de cette note. Une taille de fichier est le genre de nombre qui se
+vérifie en une seconde, et celui-là ne se vérifiait pas. Le poids de ce snapshot
+a maintenant un seul document source — le §1 de
+[`../vectoriel/NOTE.md`](../vectoriel/NOTE.md), qui le mesure par la même
+commande — et cette note y renvoie au lieu de refaire son addition.
+
+Le coût des deux bras, mis côte à côte. La ligne « disque » est mesurée au
+`du -sm` indiqué au-dessus ; la ligne « mémoire » sort du champ
+`memoire_pic_mo` de `resultats_banc.json`. Les deux lignes de temps ne
+viennent d'aucune exécution en particulier, et c'est le point :
 
 | | bras lexical seul | les deux bras |
 |---|---|---|
-| disque (paquets + modèle) | **1 Mo** (0 avec le repli) | **416 Mo** |
-| indexation des 589 articles | **80 ms** | **45 975 ms** |
-| requête, médiane sur 25 questions | **0,13 ms** | **17,74 ms** |
-| requête, pire cas | 0,64 ms | 53,44 ms |
-| pic mémoire du processus | **23,6 Mo** | **844,8 Mo** |
+| disque (paquets + modèle) | **1 Mo** (0 avec le repli) | **402 Mo** |
+| indexation des 589 articles | une fraction de seconde | **des dizaines de secondes** |
+| requête, médiane sur 25 questions | quelques dixièmes de ms | quelques ms |
+| pic mémoire du processus | **23,6 Mo** | **≈ 845 Mo** |
 
-Le facteur est de **400 en disque, 580 en temps d'indexation, 140 en temps de
-requête et 36 en mémoire**, pour **+0,08 de rappel@5 et −0,04 de rappel@1**.
-Seul le dernier de ces quatre rapports est stable d'une exécution à l'autre ;
-les trois autres bougent avec la charge de la machine, et la précision qu'ils
-affichent est trompeuse. Ce qui ne bouge pas, c'est l'ordre de grandeur :
-deux à trois puissances de dix, quelle que soit l'exécution.
+**Les deux lignes de temps de ce tableau — « indexation » et « requête » —
+n'ont plus de valeur chiffrée, et une troisième ligne, « pire cas », a été
+retirée.** Aucune des trois ne se reproduit. Les deux lignes qui restent
+chiffrées, disque et mémoire, viennent d'exécutions précises et se reproduisent,
+elles. Pour mémoire, et comme
+intervalles observés et non comme mesures : l'indexation du bras lexical est
+tombée entre 57 et 80 ms, celle des deux bras entre 15 et 46 secondes, la
+médiane par requête entre 0,1 et 0,3 ms pour le bras lexical et entre 5 et
+18 ms pour la fusion. Quant au pire cas, il dépasse la médiane d'un facteur
+1,3 à 3 selon l'exécution, et ce facteur ne mesure pas le système : il mesure ce
+que la machine faisait d'autre pendant la passe. C'est pour cela qu'il est donné
+comme intervalle, et qu'aucune conclusion de cette note ne s'appuie dessus — une
+version précédente en publiait pourtant deux valeurs au centième (0,64 ms et
+53,44 ms).
+
+Les deux chiffres de mémoire, eux, sont donnés. Ils sortent du champ
+`memoire_pic_mo` de `resultats_banc.json`, et trois exécutions les ont placés
+à 844,8, 845,0 puis 845,3 Mo pour les deux bras, et à 23,6 Mo exactement,
+deux fois, pour le bras lexical seul. Cette grandeur-là tient parce qu'elle
+mesure ce que le processus alloue, et non le temps que la machine lui
+accorde ; et elle est publiée parce qu'elle se compare à un budget — voir les
+trois remarques plus bas.
+
+Restent les **rapports** entre les deux colonnes, qui sont la seule forme
+sous laquelle ce §4 mérite d'être cité :
+
+| | rapport | se reproduit ? |
+|---|---|---|
+| disque | **× 400** | oui — ce sont des tailles de fichier |
+| mémoire | **× 36** | oui — 845 / 23,6, stable aux trois exécutions |
+| indexation | **deux ordres de grandeur** | l'ordre oui, la valeur non |
+| requête | **un à deux ordres de grandeur** | l'ordre oui, la valeur non |
+
+Une version précédente annonçait ici « 580 en indexation, 140 en requête ».
+Recalculés sur les exécutions suivantes, ces deux facteurs valent 254 et 46.
+Ce ne sont pas des corrections, ce sont **deux tirages de plus** : le facteur
+d'indexation est passé de 580 à 254 sans qu'une ligne de code change. Seuls
+l'ordre de grandeur, et les facteurs de disque et de mémoire, sont des faits.
+
+Ce prix-là — deux ordres de grandeur sur le temps, 400 sur le disque, 36 sur
+la mémoire — est payé pour **+0,08 de rappel@5 et −0,04 de rappel@1**. Ces
+deux derniers nombres, eux, se reproduisent exactement.
 
 Détail de l'indexation dense, étape par étape. Ce découpage ne sort pas de
 `banc.py` ; il faut le reproduire à part, et la mesure ci-dessous vient de ce
@@ -296,33 +399,70 @@ t = time.perf_counter(); list(enc.query_embed("combien de jours de conges ?"))
 print("une question", time.perf_counter() - t)
 ```
 
-| étape | mesure |
+| étape | ce qui s'en garde d'une machine à l'autre |
 |---|---|
-| `import numpy` + `import fastembed` | 539 ms |
-| chargement du modèle ONNX | 978 ms |
-| encodage des 781 passages | 29 508 ms (37,8 ms par passage) |
-| matrice résultante, 781 × 384 flottants | 1,14 Mio (781 × 384 × 4 octets) |
-| encodage d'une question, médiane sur 20 | 14,5 ms (max 29,3) |
+| `import numpy` + `import fastembed` | une demi-seconde environ |
+| chargement du modèle ONNX | de l'ordre de la seconde |
+| encodage des 781 passages | **des dizaines de secondes** — tout le temps d'indexation passe ici |
+| matrice résultante, 781 × 384 flottants | **1,14 Mio** (781 × 384 × 4 octets : arithmétique, pas mesure) |
+| encodage d'une question, médiane sur 20 | **quelques millisecondes** — négligeable |
 
-**Avertissement sur ces chiffres de temps.** Le bras dense est très sensible à
-ce que fait le reste de la machine, et il faut lire tous les temps de ce §4 en
-le sachant. Les deux mesures ci-dessus en donnent la preuve : construire
-l'index dense (modèle chargé + 781 passages encodés) vaut **45 975 ms** dans
-l'exécution de `banc.py` et **30 486 ms** dans le script détaillé lancé
-quelques minutes plus tard (978 + 29 508), soit un facteur 1,5 entre deux
-exécutions de la même opération, sur la même machine, le même jour.
-Une session antérieure, où plusieurs agents travaillaient en parallèle sur la
-même machine, portait pour la même étape 238 803 ms et, pour l'encodage d'une
-question, 194,8 ms contre 14,5 ms ici — un facteur 8 à 13. **Ces deux
-derniers chiffres ne sont pas rejouables et ne doivent pas être cités** : ils
-viennent d'un script qui n'a pas été conservé, et aucune commande de ce dépôt
-ne les reproduit. Je les laisse visibles parce qu'ils disent l'ampleur du
-problème, pas pour qu'on s'en serve. Je ne sais pas isoler la contention ; il
-faut retenir que les temps de ce §4 n'ont qu'un ordre de grandeur, pas une
-valeur. Le bras lexical, lui, est mesuré entre 0,13 et 0,32 ms par requête
-sur cinq exécutions : c'est la seule partie du système dont le coût ne dépend
-pas de ce que fait le reste de la machine. Les rappels, eux, sont
-déterministes : ils sont identiques d'une exécution à l'autre.
+Deux conclusions, et aucune des deux n'a besoin d'un chiffre pour tenir :
+
+- **le chargement du modèle est négligeable devant l'encodage du corpus** —
+  une seconde contre des dizaines. Mettre la matrice en cache sur disque
+  supprime donc l'essentiel du coût de démarrage, et non une part marginale ;
+- **l'encodage de la question n'est pas le problème, celui du corpus l'est** :
+  trois ordres de grandeur séparent les deux, dans toutes les exécutions.
+
+Les valeurs ponctuelles sont retirées de ce tableau parce qu'elles ne se
+reproduisent pas, et dans des proportions qui interdisent d'y croire. La
+version précédente publiait **29 508 ms** pour l'encodage des 781 passages
+(37,8 ms par passage) et une médiane de **14,5 ms** (max 29,3) pour
+l'encodage d'une question. Les mêmes lignes rejouées donnent 14 157 ms
+(18,1 ms par passage) et 3,6 ms (max 4,6) : un facteur 2 sur la première, un
+facteur 4 à 6 sur la seconde. Le script, lui, est inchangé — il est recopié
+ci-dessus et se relance tel quel.
+
+**Pourquoi ce §4 ne publie aucune durée au dixième.** Le bras dense est très
+sensible à ce que fait le reste de la machine. Une version précédente de
+cette note le démontrait par la comparaison de deux points : construire
+l'index dense (modèle chargé + 781 passages encodés) valait 45 975 ms dans
+l'exécution de `banc.py` et 30 486 ms dans le script détaillé lancé quelques
+minutes plus tard (978 + 29 508) — « un facteur 1,5 entre deux exécutions de
+la même opération, sur la même machine, le même jour ».
+
+**Cette démonstration ne tient plus, parce que ses deux points ont bougé.**
+Rejoué, `banc.py` donne 15,2 s puis 15,5 s pour cette même étape, et le
+script détaillé environ 15 s (14 157 ms d'encodage plus le chargement du
+modèle) : le facteur 1,5 entre les deux a disparu. Un raisonnement bâti sur
+l'écart entre deux mesures instables ne survit pas au rejeu de ces mesures.
+C'est pourquoi il est remplacé ici au lieu d'être recalculé avec les
+nouveaux nombres : les nouveaux nombres bougeront aussi.
+
+Ce qui se reproduit, et qui dit la même chose en plus fort, c'est **la
+dispersion elle-même**. Pour cette unique étape, dont le code n'a pas changé
+d'une ligne, les exécutions conservées donnent **15,2 s, 15,5 s, 30,5 s et
+46 s** — un facteur 3 entre la plus rapide et la plus lente. Et une session
+antérieure, où plusieurs agents travaillaient en parallèle sur la même
+machine, portait pour la même étape 238 803 ms et, pour l'encodage d'une
+question, 194,8 ms — un facteur 15 au-delà. **Ces deux derniers chiffres ne
+sont pas rejouables et ne doivent pas être cités** : ils viennent d'un script
+qui n'a pas été conservé, et aucune commande de ce dépôt ne les reproduit. Je
+les laisse visibles parce qu'ils disent l'ampleur du problème, pas pour qu'on
+s'en serve.
+
+La conclusion est une propriété du système, et non d'une exécution : **le
+coût du bras dense n'a pas de valeur, il n'a qu'un ordre de grandeur**, et
+cet ordre bouge d'un facteur 3 sur une machine au repos, d'un facteur 15 sous
+charge concurrente. Je ne sais pas isoler la contention — et c'est bien le
+reproche fait à ce bras, pas une excuse pour ne pas le chiffrer : un
+composant dont le coût varie d'un facteur 15 selon les voisins est un
+composant qu'on ne sait pas dimensionner. Le bras lexical, lui, reste entre
+0,1 et 0,3 ms de médiane par requête sur toutes les exécutions : c'est la
+seule partie du système dont le coût ne dépend pas de ce que fait le reste de
+la machine. Les rappels, enfin, sont déterministes : identiques d'une
+exécution à l'autre.
 
 Trois remarques sur ces chiffres :
 - Le pic de 845 Mo interdit l'hébergement visé par les autres projets de
@@ -330,7 +470,10 @@ Trois remarques sur ces chiffres :
   seul tient dans 24 Mo.
 - L'indexation dense est à refaire à chaque démarrage du processus dans ce
   prototype. En production on sérialiserait la matrice (781 × 384 flottants =
-  1,14 Mo) ; il resterait le chargement du modèle ONNX à chaque démarrage.
+  1 199 616 octets, soit **1,14 Mio**) ; il resterait le chargement du modèle
+  ONNX à chaque démarrage. Le tableau ci-dessus écrit « 1,14 Mio » et cette
+  remarque écrivait « 1,14 Mo » pour le même produit : la seconde forme était
+  fausse, le mébioctet et le mégaoctet s'écartant ici de 5 % (1,14 contre 1,20).
 - `pip` a tiré PIL (16 Mo) et hf_xet (10 Mo) dont ce prototype ne se sert
   jamais. Un vrai déploiement les épinglerait hors de l'image.
 
@@ -451,10 +594,11 @@ l'écart soit visible par le lecteur.
 
 **Je ne recommande pas de livrer la combinaison telle que je l'ai mesurée.**
 
-Elle coûte 416 Mo de disque, 804 Mo de mémoire et 40 secondes d'indexation
-pour gagner 0,08 de rappel@5 et perdre 0,04 de rappel@1 face à 170 lignes de
-BM25 qui tiennent dans 22 Mo. Un gain de cette taille, sur 25 questions, ne
-paie pas ce facteur 400. Et le plafond de l'oracle (0,76 @5) dit que le
+Elle coûte 402 Mo de disque, près de 0,9 Go de mémoire et des dizaines de
+secondes d'indexation pour gagner 0,08 de rappel@5 et perdre 0,04 de
+rappel@1 face à un BM25 de **137 lignes** (`wc -l lexical.py` ; 243 avec
+`normaliser.py`, qu'il importe) qui tient dans 24 Mo. Un gain de cette taille,
+sur 25 questions, ne paie pas ce facteur 400. Et le plafond de l'oracle (0,76 @5) dit que le
 problème n'est pas la fusion : c'est que **les deux bras ignorent le même
 dictionnaire** entre le français des salariés et celui du législateur.
 
@@ -474,7 +618,7 @@ Ce que je recommande à la place, dans cet ordre :
    fois sur trois.
 3. **Garder le second bras uniquement pour le signal de désaccord**, qui est
    la seule chose que ce prototype fait bien (6 refus, 6 fois à raison) — et
-   seulement si l'on peut le payer. Si les 804 Mo sont hors budget, ce signal
+   seulement si l'on peut le payer. Si ces 0,9 Go sont hors budget, ce signal
    se reconstruit à moindre coût avec deux bras lexicaux **réellement
    différents** (par exemple BM25 sur le texte contre BM25 sur les intitulés
    de la hiérarchie), à mesurer.

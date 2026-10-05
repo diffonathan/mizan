@@ -560,6 +560,46 @@ def _pc(valeur: float | None) -> str:
     return "     —" if valeur is None else f"{valeur * 100:5.1f} %"
 
 
+def ecrire_verite_de_reference(jeu: dict, corpus: dict) -> None:
+    """Recense la vérité de référence : combien d'articles, cités combien de fois.
+
+    Ces chiffres sont publiés dans METHODE.md § 1. Ils étaient exacts, mais
+    aucune commande du dépôt ne les imprimait : un nombre que personne ne peut
+    recalculer est un nombre que personne ne peut contredire, ce qui est pire
+    qu'un nombre faux — un nombre faux se corrige, celui-là jamais.
+
+    Ce sont des comptages sur questions.json et sur le corpus, pas des durées :
+    quiconque clone le dépôt retrouve exactement les mêmes valeurs.
+
+    Deux décomptes sont distingués à dessein. Les OCCURRENCES disent combien de
+    fois le jeu exige un article ; les articles DISTINCTS disent quelle part du
+    Code il touche. Le second est plus petit parce que plusieurs questions
+    appellent le même article — c'est précisément ce que mesurent les
+    étiquettes « reformulation ».
+    """
+    repondables = [q for q in jeu["questions"] if q.get("articles_attendus")]
+    occurrences = sum(len(q["articles_attendus"]) for q in repondables)
+    attendus = {n for q in repondables for n in q["articles_attendus"]}
+    toleres = {n for q in jeu["questions"]
+               for n in (q.get("articles_toleres") or [])}
+    total = len(corpus["articles"])
+
+    print()
+    print("  Vérité de référence du jeu")
+    print("  " + "-" * 62)
+    print(f"  {'questions répondables':46}{len(repondables):4d}")
+    print(f"  {'questions sans réponse dans le Code':46}"
+          f"{len(jeu['questions']) - len(repondables):4d}")
+    print(f"  {'occurrences d\'article attendu':46}{occurrences:4d}")
+    print(f"  {'articles attendus distincts':46}{len(attendus):4d}")
+    print(f"  {'articles tolérés distincts':46}{len(toleres):4d}")
+    print(f"  {'... dont attendus par aucune question':46}"
+          f"{len(toleres - attendus):4d}")
+    print(f"  {'union attendus + tolérés':46}"
+          f"{len(toleres | attendus):4d} / {total} articles du Code")
+    print()
+
+
 def ecrire_couverture(jeu: dict, corpus: dict) -> None:
     """Dit quelle part du Code le jeu touche, livre par livre.
 
@@ -724,7 +764,8 @@ def principal(argv: Sequence[str] | None = None) -> int:
     analyseur.add_argument("--detail", action="store_true",
                            help="écrit le résultat question par question")
     analyseur.add_argument("--couverture", action="store_true",
-                           help="écrit la part du Code couverte par le jeu, livre par livre")
+                           help="écrit le recensement de la vérité de référence "
+                                "et la part du Code couverte, livre par livre")
     analyseur.add_argument("--seuil-rappel3", type=float, default=None,
                            help="sortie en code 1 si le rappel@3 passe dessous (0 à 1)")
     analyseur.add_argument("--seuil-abstention", type=float, default=None,
@@ -746,6 +787,7 @@ def principal(argv: Sequence[str] | None = None) -> int:
     res = executer(recuperer, jeu, corpus, nom)
     ecrire_rapport(res, detail=options.detail)
     if options.couverture:
+        ecrire_verite_de_reference(jeu, corpus)
         ecrire_couverture(jeu, corpus)
 
     echecs: list[str] = []

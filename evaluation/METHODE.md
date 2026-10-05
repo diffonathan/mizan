@@ -17,7 +17,8 @@ d'ailleurs.
 
 ```
 python banc.py              # affiche l'effectif et les effectifs par catégorie
-python banc.py --couverture # ajoute la part du Code touchée, livre par livre
+python banc.py --couverture # ajoute le recensement de la vérité de référence
+                            # et la part du Code touchée, livre par livre
 ```
 
 **64 questions**, dont **57 ont une réponse** dans le corpus et **7 n'en ont
@@ -26,6 +27,26 @@ pas**. Les 57 questions répondables citent **70 fois un article attendu**, soit
 **132 articles distincts**, dont **112 qui ne sont attendus par aucune
 question** ; l'union des deux listes couvre donc **169 des 589 articles**
 (57 + 112).
+
+Ces nombres ne sont pas comptés à la main : `python banc.py --couverture` les
+imprime sous « Vérité de référence du jeu », et c'est de là qu'ils viennent.
+
+```
+  Vérité de référence du jeu
+  --------------------------------------------------------------
+  questions répondables                           57
+  questions sans réponse dans le Code              7
+  occurrences d'article attendu                   70
+  articles attendus distincts                     57
+  articles tolérés distincts                     132
+  ... dont attendus par aucune question          112
+  union attendus + tolérés                       169 / 589 articles du Code
+```
+
+Les **occurrences** et les articles **distincts** ne disent pas la même chose :
+70 est le nombre de fois où le jeu exige un article, 57 le nombre d'articles du
+Code qu'il touche. L'écart vient des questions qui appellent le même article —
+c'est exactement ce que fabriquent les étiquettes `reformulation`.
 
 Les étiquettes se cumulent, donc les effectifs ci-dessous ne s'additionnent pas
 à 64 :

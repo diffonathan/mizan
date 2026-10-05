@@ -5,24 +5,31 @@ mesurés séparément, chacun sur des questions écrites par son propre auteur.
 Un quatrième agent avait écrit, sans les voir, un jeu d'évaluation de
 64 questions.
 
-**Tout chiffre de ce document sort d'une commande du §10**, et les commandes
-du §10 ont toutes été relancées, dans cet ordre, après la dernière écriture de
-ce document. Les nombres repris des trois notes de prototype apparaissent à
-trois endroits, tous signalés comme tels : la colonne « sur son propre banc »
-du §2, dont la comparaison est l'objet même de ce dossier ; les 14,3 % que
-l'auteur du candidat 1 avait mesurés sur ses propres questions, cités au §2
-pour montrer qu'il avait vu son défaut avant qu'on le lui mesure ; et le
-centrage anti-hubness du candidat 2, que je n'ai pas refait et que le §7 nomme
-avec sa raison. Partout ailleurs, un nombre vient d'une exécution ou n'est pas
-écrit.
+**Tout chiffre de ce document sort d'une commande, et la commande est
+nommée.** Celles du §10 ont été relancées d'un bout à l'autre, dans cet ordre,
+le 4 octobre 2026. Les nombres repris des trois notes de prototype
+apparaissent à trois endroits, tous signalés comme tels : la colonne « sur son
+propre banc » du §2, dont la comparaison est l'objet même de ce dossier ; les
+14,3 % que l'auteur du candidat 1 avait mesurés sur ses propres questions,
+cités au §2 pour montrer qu'il avait vu son défaut avant qu'on le lui mesure ;
+et le centrage anti-hubness du candidat 2, qui ne sort pas d'une commande du
+§10 mais d'une commande de son propre prototype — le §7 la nomme, elle tourne
+en quelques secondes, et relancée elle redonne son chiffre au millième.
+Partout ailleurs, un nombre vient d'une exécution ou n'est pas écrit.
 
 Trois réserves que cette promesse mérite, parce qu'elle ne vaut rien sans
 elles.
 
-- **Les durées ne se reproduisent pas au chiffre près.** Celles du §6 varient
-  de quelques millisecondes par question d'un rejeu à l'autre, et l'indexation
-  à froid de 727 à 1 010 secondes selon la charge de la machine. Le §6 nomme
-  l'exécution qu'il cite et le fichier qui la garde.
+- **Aucune durée n'est publiée comme un fait**, parce qu'aucune ne se
+  reproduit. Elles ont toutes été relevées sur une machine de bureau partagée,
+  pendant que d'autres travaux tournaient : une version antérieure de ce
+  document publiait « 727,5 s » pour l'indexation à froid et une plage de
+  « 727 à 1 010 s » ; le rejeu suivant a demandé 1 075 s, c'est-à-dire plus que
+  la plage, ce qui était prévisible et dit assez ce que valait la précision
+  affichée. Le §6 publie donc des ordres de grandeur, des rapports et des
+  dispersions, et il dit pour chaque ligne ce qui tient d'une machine à
+  l'autre. Remplacer un chiffre périmé par un chiffre frais n'aurait fait que
+  reporter le même problème au rejeu suivant.
 - **Les rappels, eux, se reproduisent — et ce n'était pas acquis.** Replonger
   le corpus ne redonne pas les mêmes vecteurs que le cache, mais redonne les
   mêmes classements sur les 64 questions, et les mêmes trois rappels. Le §6
@@ -158,6 +165,14 @@ les quatre modèles du candidat 2 avaient leurs vecteurs déjà en cache.
 | multilingual-e5-large | 57,0 | 83,3 | **92,1** | 72,2 | 2 149 Mo |
 | **embeddinggemma-300m** | **61,1** | **84,5** | 88,0 | **82,1** | 1 198 Mo |
 
+La colonne « disque » est une reprise, pas une mesure de ce document : elle vient
+du §1 de [`prototypes/vectoriel/NOTE.md`](prototypes/vectoriel/NOTE.md), seul
+endroit où ces quatre poids sont relevés par une commande (`du -sm` sur les
+dossiers de snapshot), à l'exception de la ligne gemma, que `cout.py` remesure et
+que le §6 publie. Ce document ne garde donc pas sa propre copie de ces tailles —
+c'est en en gardant une que la note du candidat 3 a publié 255 Mo pour le
+snapshot MiniLM qui en pèse 241.
+
 MiniLM fait **moins bien que le plancher naïf** (21,9 contre 30,7 au rang 1).
 Potion aussi. Les deux modèles qui gagnent sont précisément les deux qui
 reçoivent un préfixe de rôle (`query:` / `passage:` pour e5, `task: search
@@ -240,9 +255,13 @@ Rappel@5 par catégorie, où se voit ce que la queue rapporte :
 | **greffe retenue** | 85,8 | **100,0** | 84,7 | **94,0** | **85,0** | 66,7 | **80,0** |
 | BM25 seul | 42,6 | 76,0 | 37,5 | 62,0 | 60,0 | **100,0** | 80,0 |
 
-Le coût en calcul de cette queue est **0,43 ms par question, 0,11 s
-d'indexation et zéro octet de dépendance** (bras lexical mesuré seul dans la
-table du §2) : il est en bibliothèque standard. Mais la queue n'est pas
+Le coût en calcul de cette queue est **0,11 s d'indexation, moins d'une
+milliseconde par question et zéro octet de dépendance** : il est en
+bibliothèque standard. Les deux valeurs sortent de la ligne `lexical` de
+`res_candidats.json`, que la première commande du §10 écrit. Le dixième de
+seconde se retrouve à l'identique d'une exécution à l'autre ; la milliseconde,
+non — les exécutions connues vont de 0,41 à 0,47 ms —, et c'est pourquoi c'est
+un majorant qui est écrit et non une valeur. Mais la queue n'est pas
 gratuite pour autant, et le tableau des quatre questions dit son prix : elle
 **coûte Q26**, c'est-à-dire l'article que le bras dense plaçait au rang 4. On
 n'échange pas ici du rappel contre des octets, on échange trois questions
@@ -446,68 +465,94 @@ Deux régimes à ne jamais confondre : l'indexation se paie une fois au
 déploiement, la requête se paie à chaque question. La note du candidat 2
 raconte comment les confondre produit un chiffre faux d'un facteur 70.
 
+**Ce que ce § publie, et ce qu'il refuse de publier.** Les durées de cette
+section ont été relevées sur une machine de bureau partagée, pendant que
+d'autres travaux tournaient. Une durée relevée là n'est pas reproductible :
+elle a changé à chaque rejeu, et elle changera encore. Elle n'est donc pas
+écrite comme un fait. Ce § publie l'ordre de grandeur quand il suffit ; le
+rapport entre deux durées quand c'est lui qui porte la conclusion — un rapport
+mesuré dans une même exécution subit la même charge des deux côtés et se
+reproduit, là où la milliseconde ne se reproduit pas ; et rien du tout quand la
+conclusion n'a pas besoin d'un chiffre. Les deux mémoires et les poids de
+disque, eux, sont stables d'un rejeu à l'autre et sont donnés tels quels.
+
 Mesure dans un processus **neuf** qui relit un index déjà calculé et répond
 aux 64 questions du banc (`arbitrage/cout.py`) :
 
-| | mesuré |
-|---|---|
-| démarrage (modèle ONNX + index) | **1,96 s** |
-| par question, médiane sur 64 | **20,27 ms** |
-| par question, 95e centile | 25,41 ms |
-| par question, maximum | 27,42 ms |
-| dont produit scalaire contre la matrice, médiane | **0,037 ms** |
-| mémoire résidente en service | **593,6 Mo** |
-| pic de mémoire | **868,0 Mo** |
+| | ce qui est publié | ce qui se reproduit |
+|---|---|---|
+| démarrage (modèle ONNX + index) | **de l'ordre de 2 s** | toutes les exécutions connues tiennent entre 1,9 et 2,4 s |
+| par question, médiane sur 64 | **de l'ordre de 20 ms** | toutes tiennent entre 20 et 26 ms, et aucune n'a redonné la même valeur |
+| par question, la plus lente d'une passe | **1,3 à 1,9 fois la médiane**, et rien de plus | ce facteur seul : c'est la charge de la machine qu'on y mesure, pas le système, et aucune valeur en millisecondes n'est publiée |
+| dont produit scalaire contre la matrice | **moins de 0,2 %** du temps d'une question | le rapport reste de l'ordre de 1 pour 600 à chaque exécution |
+| mémoire résidente en service | **595 Mo** | stable à quelques mégaoctets près |
+| pic de mémoire | **868 Mo** | stable à quelques mégaoctets près |
 
-Les durées ci-dessus sont celles d'**une** exécution, la dernière, celle que
-`arbitrage/res_cout.json` conserve. Sur les quatre exécutions de cette
-session, la médiane par question est allée de **20,3 à 25,4 ms** et le
-démarrage de 1,96 à 2,39 s, selon ce qui tournait d'autre sur la machine. La
-médiane est citée plutôt que la moyenne pour cette raison, et le maximum est
-la valeur la moins reproductible du tableau. Les deux mémoires, en revanche,
-sont stables au mégaoctet près d'un rejeu à l'autre, et c'est le chiffre à
-regarder pour décider d'un hébergement.
+Il ne faut pas chercher ces durées dans `arbitrage/res_cout.json` : ce fichier
+conserve les valeurs de la **dernière** exécution de `cout.py` sur cette
+machine, quelle qu'elle soit, et c'est exactement pour cela qu'elles ne sont
+plus publiées comme des points. Ce qu'on peut lui demander, c'est de redonner
+les mêmes ordres de grandeur et les mêmes rapports ; une version antérieure de
+ce document annonçait au contraire que ses chiffres y étaient conservés à
+l'identique — une phrase qui devenait fausse au premier rejeu. La médiane est
+citée plutôt que la moyenne parce que la queue de distribution mesure la charge
+de la machine et non le système : publier la question la plus lente d'une
+passe, comme ce document le faisait, c'était publier un chiffre dont la phrase
+suivante disait qu'il ne valait rien. Les deux mémoires, en revanche, sont
+stables au mégaoctet près d'un rejeu à l'autre, et c'est le chiffre à regarder
+pour décider d'un hébergement.
 
-La ligne du produit scalaire est celle qui dit où partent les 20,27 ms, et
-elle n'est pas anodine : les 588 × 768 flottants de l'index sont parcourus
-**entièrement** à chaque question, et cela coûte **0,2 % du temps de
-réponse**. Tout le reste est le plongement de la question, qui ne dépend pas
-de la taille du corpus. C'est le chiffre sur lequel repose le §9.6, et c'est
-la raison pour laquelle aucun index approché n'est nécessaire ici. Il manquait
-à la première version de ce document, qui concluait la même chose sans l'avoir
-mesuré.
+La ligne du produit scalaire est celle qui dit où part le temps d'une
+question, et elle n'est pas anodine : les 588 × 768 flottants de l'index sont
+parcourus **entièrement** à chaque question, et cela coûte **moins de 0,2 % du
+temps de réponse**. C'est le rapport qui est écrit ici, et non la fraction de
+milliseconde qui le porte, parce que c'est lui qui se reproduit : les deux
+durées du rapport sont relevées dans la même exécution, donc sous la même
+charge, et il est resté de l'ordre de 1 pour 600 à chaque fois. Tout le reste
+est le plongement de la question, qui ne dépend pas de la taille du corpus.
+C'est le rapport sur lequel repose le §9.6, et c'est la raison pour laquelle
+aucun index approché n'est nécessaire ici. Il manquait à la première version de
+ce document, qui concluait la même chose sans l'avoir mesuré.
 
 L'indexation, elle, se paie une fois. Mesurée par `arbitrage/froid.py`, qui
 replonge les 588 articles non vides dans un processus dédié et compare le
 résultat au cache :
 
-| | mesuré |
-|---|---|
-| temps d'indexation | **727,5 s** |
-| pic de mémoire résidente du processus | **9 622,8 Mo** |
-| écart absolu maximal avec les vecteurs du cache | **0,012366** |
-| valeur absolue moyenne d'une composante | 0,028397 |
-| rappel sur les vecteurs du cache | 61,1 / 84,5 / 88,0 |
-| rappel sur les vecteurs replongés | **61,1 / 84,5 / 88,0** |
-| questions dont les cinq articles rendus diffèrent | **0 / 64** |
+| | ce qui est publié | ce qui se reproduit |
+|---|---|---|
+| temps d'indexation | **un quart d'heure, à la moitié près** | les trois indexations complètes connues ont demandé 727, 1 010 et 1 075 s |
+| pic de mémoire résidente du processus | **de l'ordre de 9,5 Go** | 9,4 et 9,6 Go sur les deux exécutions qui l'ont relevé |
+| écart absolu maximal avec les vecteurs du cache | **0,012366** | se recalcule à l'identique avec `--relire`, à partir des vecteurs gardés ; une indexation neuve donnerait un autre écart, du même ordre |
+| valeur absolue moyenne d'une composante | 0,028397 | idem |
+| rappel sur les vecteurs du cache | 61,1 / 84,5 / 88,0 | se reproduit |
+| rappel sur les vecteurs replongés | **61,1 / 84,5 / 88,0** | se reproduit |
+| questions dont les cinq articles rendus diffèrent | **0 / 64** | se reproduit |
 
 Trois observations, et la troisième corrige ce que ce document affirmait.
 
-- **Le pic de 9,6 Go est le vrai coût d'une indexation**, parce que
-  `fastembed` plonge par lots de 256 par défaut. C'est la confirmation
-  indépendante de ce que l'auteur du candidat 2 avait mesuré et corrigé en
-  réduisant la taille des lots. Une indexation de déploiement doit fixer
+- **Le pic, de l'ordre de dix gigaoctets, est le vrai coût d'une
+  indexation**, parce que `fastembed` plonge par lots de 256 par défaut. C'est
+  la confirmation indépendante de ce que l'auteur du candidat 2 avait mesuré et
+  corrigé en réduisant la taille des lots. Une indexation de déploiement doit fixer
   `batch_size` explicitement ; sans quoi elle réclame plus de mémoire que
   n'importe quel conteneur prévu pour ce service — et six fois le plafond du
   VPS visé.
-- **Le temps dépend de la charge de la machine**, et pas un peu : une première
-  exécution le même soir, pendant que d'autres travaux tournaient, a demandé
-  1 009,5 s pour le même calcul. Les 727,5 s ci-dessus sont la seconde
-  exécution, celle que `res_froid.json` conserve — et ce fichier porte un
-  drapeau `mesures_de_temps_relues` qui dit si ses durées viennent de
-  l'exécution qu'il décrit ou d'une relecture des vecteurs par `--relire`.
-  Sur une opération qui se paie une fois au déploiement, cette dispersion n'a
-  pas de conséquence pratique ; elle en a une sur la lecture du tableau.
+- **Le temps dépend de la charge de la machine, et pas un peu.** Trois
+  indexations complètes sont connues, pour le même calcul et le même corpus :
+  727,5 s, 1 009,5 s et 1 075,4 s, soit un rapport de 1,5 entre la plus rapide
+  et la plus lente. Ce document a publié la première comme **la** valeur, avec
+  « 727 à 1 010 s » comme plage ; la troisième est tombée hors de cette plage.
+  Ce n'était pas la valeur qui était périmée, c'était la façon de la publier :
+  une plage tirée de deux exécutions sur une machine partagée n'est pas une
+  plage, c'est deux points. Ce qui est publié ici est donc l'ordre de grandeur
+  et la dispersion. `res_froid.json` porte les durées de la dernière
+  indexation complète, quelle qu'elle soit, et un drapeau
+  `mesures_de_temps_relues` qui dit si elles viennent de l'exécution qu'il
+  décrit ou d'une relecture des vecteurs par `--relire` : il n'y a donc pas à
+  s'attendre à y relire un chiffre de ce tableau. Sur une opération qui se paie
+  une fois au déploiement, cette dispersion n'a aucune conséquence pratique —
+  ce qu'il faut savoir avant de déployer, c'est qu'il faut prévoir un quart
+  d'heure et dix gigaoctets, pas 727,5 secondes.
 - **Les vecteurs replongés ne sont PAS identiques à ceux du cache, et ce
   document affirmait le contraire.** L'écart absolu maximal vaut 0,0124, soit
   **43,5 % de la valeur absolue moyenne d'une composante** : ce n'est pas un
@@ -529,7 +574,7 @@ Trois observations, et la troisième corrige ce que ce document affirmait.
   garantit qu'il en irait de même sur un corpus où deux articles seraient
   quasi identiques.
 
-| disque | mesuré |
+| disque, relevé par `cout.py` (champ `disque_mo`) | mesuré |
 |---|---|
 | paquets Python (`fastembed`, `onnxruntime`, `numpy`, `tokenizers`…) | 161,3 Mo |
 | modèle `embeddinggemma-300m` ONNX | 1 198,3 Mo |
@@ -537,19 +582,27 @@ Trois observations, et la troisième corrige ce que ce document affirmait.
 | corpus JSON | 0,9 Mo |
 | **total** | **1 362,2 Mo** |
 
-À comparer au bras lexical seul, mesuré dans la table du §2 : **0,11 s**
-d'indexation, **0,43 ms** par question, **zéro** paquet et rien à télécharger.
-La requête dense est donc une cinquantaine de fois plus lente, et la pile pèse
-1 362 Mo contre le seul fichier `bm25.py`. Ce que cela achète : **27 points de rappel@1**
-(61,1 contre 34,2) et, en langue d'usager, **47 points de rappel@3** (82,1
-contre 35,2). Contrairement aux autres arbitrages de ce dossier, celui-là
-n'est pas serré.
+À comparer au bras lexical seul, mesuré par la première commande du §10 :
+**0,11 s** d'indexation, **moins d'une milliseconde** par question, **zéro**
+paquet et rien à télécharger. Le rapport entre les deux bras — mesuré dans la
+même exécution de `comparer.py`, où ils subissent donc la même charge — est
+d'environ **60** : la requête dense est une soixantaine de fois plus lente que
+la lexicale, et c'est ce rapport qui se reproduit, pas les millisecondes des
+deux côtés. La pile, elle, pèse 1 362 Mo contre le seul fichier `bm25.py`. Ce
+que cela achète : **27 points de rappel@1** (61,1 contre 34,2) et, en langue
+d'usager, **47 points de rappel@3** (82,1 contre 35,2). Contrairement aux
+autres arbitrages de ce dossier, celui-là n'est pas serré.
 
-Le pic de 868,0 Mo tient dans le plafond Docker de 1 536 Mo du VPS de
-l'auteur, pas dans ceux de 640 et 192 Mo. Un déploiement sur ce VPS devrait
+Le pic de 868 Mo mesuré en service tient dans le plafond Docker de 1 536 Mo
+du VPS de l'auteur, pas dans ceux de 640 et 192 Mo. Un déploiement sur ce VPS devrait
 donc viser le conteneur le plus large, et l'image pourrait écarter `pillow`,
-tiré par `fastembed` pour ses modèles d'image, jamais utilisé ici, et qui pèse
-15,3 Mo dans le `.venv`.
+tiré par `fastembed` pour ses modèles d'image et jamais utilisé ici. Son poids
+dans le `.venv` a une seule source : la commande par paquet du §2 de
+[`prototypes/vectoriel/NOTE.md`](prototypes/vectoriel/NOTE.md), qui le mesure à
+**16,0 Mo**. Ce document y renvoie au lieu d'en garder une copie — il en portait
+une, « 15,3 Mo », qui est le même dossier compté en mébioctets sans le dire, et
+deux unités silencieuses pour un seul fichier sont exactement ce que la règle du
+renvoi évite.
 
 **Aucun paquet n'a été installé pendant cet arbitrage.** Le `python -m pip
 list` de l'environnement partagé est inchangé et compte les dix mêmes paquets
@@ -558,13 +611,14 @@ PyNaCl, PyYAML). Les mesures denses tournent dans le `.venv` que le candidat 2
 avait monté sous `prototypes/vectoriel/`, et les quatre modèles ONNX étaient
 déjà en cache.
 
-Une précision qui compte pour qui voudrait comparer des millisecondes :
-**d'autres processus Python tournaient sur la machine** pendant la passe de
-vérification de ce document, et les durées du tableau ci-dessus ont donc été
-mesurées sous une charge que personne ne peut reproduire. C'est la raison pour
-laquelle elles sont présentées comme une exécution nommée et non comme une
-caractéristique du système. Les rappels, eux, n'en dépendent pas : ils ne
-mesurent aucun temps.
+**Les rappels, eux, ne dépendent pas de la charge** : ils ne mesurent aucun
+temps, et c'est pourquoi ce document les écrit au dixième de point quand il
+n'écrit plus les durées au centième. C'est aussi la raison pour laquelle aucune
+décision de ce dossier ne repose sur une milliseconde : toutes reposent sur un
+rappel, un rapport ou un ordre de grandeur. Un lecteur qui rejoue `cout.py`
+dans six mois, sur une autre machine, doit pouvoir retrouver chaque ligne de ce
+§6 — c'est la seule raison pour laquelle les durées n'y sont plus écrites comme
+des valeurs.
 
 ---
 
@@ -577,10 +631,10 @@ mesurent aucun temps.
 | **MiniLM et potion** comme bras dense | 21,9 et 24,6 @1, **sous le plancher naïf**. Deux gigaoctets d'écosystème ne sont pas la question : ces modèles sont moins bons que le `bm25.py` du candidat 1, qui tient en 358 lignes de bibliothèque standard. |
 | **RRF k=60** (candidat 3 tel que présenté) | 28,9 @1, **sous le plancher naïf de 30,7**. Son auteur avait déjà montré que k=60 était inadapté à deux bras sur un petit corpus. |
 | **Toute fusion des deux classements en un seul** | −10 points @1 contre le bras dense seul, avec les deux fusions et les deux bons modèles denses (§2). |
-| **e5-large** | meilleur @5 (92,1 contre 88,0) et seul à 100 % sur `injection`, mais 57,0 @1, 2 149 Mo de disque et **deux fois et demie le temps de gemma** par question (49 à 59 ms contre 21 à 25, selon la charge ; c'est le rapport qui se reproduit, pas la milliseconde). Écarté sur le rang 1 et le coût, pas sans regret — voir §9. |
+| **e5-large** | meilleur @5 (92,1 contre 88,0) et seul à 100 % sur `injection`, mais 57,0 @1, 2 149 Mo de disque et **un peu plus du double du temps de gemma** par question. C'est le rapport qui est publié, parce que c'est lui qui se reproduit : quatre paires e5/gemma, mesurées chacune **dans une même exécution** de `comparer.py` et donc sous la même charge des deux côtés, donnent 2,16, 2,15, 2,12 et 2,15 (colonnes `ms_par_question` de `res_candidats.json` et `res_greffes.json`). Les millisecondes brutes, elles, ont bougé à chaque rejeu — ce document a publié « 49 à 59 ms contre 21 à 25 », bornes qu'aucune des quatre exécutions ne retrouve. Ce rapport est publié **ici et nulle part ailleurs** : `prototypes/vectoriel/NOTE.md` y renvoie, après avoir publié de son côté un « ~ 100 ms » et un « ordre de grandeur plus lent » que ces quatre paires démentent. Écarté sur le rang 1 et le coût, pas sans regret — voir §9. |
 | **Le score de similarité comme indicateur de confiance** | intervalles justes 0,472–0,721 et faux 0,458–0,641 : ne sépare rien. |
 | **Le seuil de couverture lexicale à 0,6** comme abstention | 94,7 % de service pour 2 refus sur 7 questions hors corpus. Ne protège de rien. |
-| **Le centrage anti-hubness** | non remesuré ici. Le candidat 2 l'avait mesuré dégradant sur ses trois modèles (gemma 0,853 → 0,765 @3) et avait gardé le code avec son résultat négatif. Je n'ai pas de raison de refaire une mesure qui coûte un réembarquement complet du corpus pour contredire un résultat cohérent. |
+| **Le centrage anti-hubness** | non remesuré sur le jeu indépendant, mais **vérifiable en quelques secondes**, et vérifié. Ce document écrivait que la mesure « coûte un réembarquement complet du corpus » : c'était faux, et cela faisait du chiffre le seul du dossier que personne ne pouvait contredire. La clé du cache de vecteurs ne contient pas le centrage, qui s'applique **après** la lecture du cache (`index_vectoriel.construire_index`) : les deux configurations relisent donc les mêmes vecteurs déjà calculés. D'où la commande, qui manquait — `cd prototypes/vectoriel`, puis `.venv/Scripts/python.exe mesurer.py --cache --une 5` (gemma) et `--cache --une 6` (gemma + centrage). Relancée le 4 octobre 2026 sur le banc du candidat 2 (34 questions répondables), elle redonne exactement le résultat de sa note : **@3 0,853 → 0,765**, @5 0,853 → 0,824, @1 inchangé à 0,588. Sa note donne le même verdict sur e5 (0,618 → 0,588) et MiniLM (0,500 → 0,382) ; ces deux-là, je ne les ai **pas** rejoués, et les commandes qui les rejoueraient sont `--une 7`/`--une 8` et `--une 0`/`--une 3`. Le remède dégrade, son auteur avait gardé le code avec son résultat négatif, et il n'y a pas lieu de le rouvrir. |
 
 Les trois prototypes sont conservés **intacts** dans `prototypes/`, avec les
 notes de leurs auteurs. `prototypes/REJOUER.md` donne la commande de chacun,
@@ -627,14 +681,20 @@ exactement les chiffres de ce document.
   un argument de mécanisme : les seuls réglages disponibles sont le modèle,
   l'entête et le découpage, et les deux modèles qui gagnent sont ceux dont
   l'entraînement explique qu'ils gagnent.
-- **Le banc ne mesure que la récupération.** Rien ici ne dit si la réponse
-  rédigée sera fidèle aux articles cités, ni si les citations affichées seront
-  exactes, ni si la génération résistera aux cinq injections. La catégorie
-  `injection` mesure si une consigne de détournement **déplace la
-  récupération**, ce qui est utile et n'est pas de la sûreté : la défense
-  contre l'injection commence ici, elle ne s'y termine pas. Mesurer la
-  génération exige un modèle de langue, donc une clé, donc une mesure que
-  personne ne pourra recalculer — ce sera un autre banc, déclaré comme tel.
+- **`evaluation/banc.py` ne mesure que la récupération.** Rien dans CE banc ne
+  dit si la réponse rédigée sera fidèle aux articles cités, ni si les
+  citations affichées seront exactes, ni si la génération résistera aux cinq
+  injections. La catégorie `injection` mesure si une consigne de détournement
+  **déplace la récupération**, ce qui est utile et n'est pas de la sûreté : la
+  défense contre l'injection commence ici, elle ne s'y termine pas.
+- **L'autre banc existe, et il est déclaré comme tel.**
+  `evaluation/banc_bout_en_bout.py` mesure la réponse — exactitude des
+  citations, taux de rejet par la garde, abstention — et tourne **sans clé**,
+  parce que la rédaction y est tenue par des modèles factices déterministes
+  dont le banc prédit les hallucinations et vérifie qu'il les retrouve. Ses
+  chiffres ne mesurent donc PAS un modèle de production, et chacun porte ce
+  drapeau : la méthode est dans `evaluation/METHODE-BOUT-EN-BOUT.md`, le
+  tableau de bord dans `MESURES.md`.
 - **La date de consolidation est le 26 octobre 2011.** Le meilleur rappel du
   monde ne rend pas ce texte conforme à l'état du droit en 2026, et aucun
   chiffre de ce document ne doit être lu comme une mesure de justesse
@@ -712,9 +772,10 @@ Chacune de ces conditions est une mesure à faire, pas une opinion à réviser.
 4. **Si la robustesse à l'injection devient prioritaire.** e5-large est le
    seul à 100 % sur les cinq questions `injection` (gemma : 40 %). Cinq
    questions ne décident de rien, mais si un banc d'injection sérieux
-   confirmait l'écart, e5 reprendrait l'avantage malgré ses 2 149 Mo et ses
-   deux questions servies pour cinq de gemma dans le même temps — et la fusion
-   BM25+e5, qui monte à 80 % sur cette catégorie, mériterait d'être rouverte.
+   confirmait l'écart, e5 reprendrait l'avantage malgré ses 2 149 Mo et le
+   fait qu'il sert une question là où gemma en sert deux (le rapport du §7) —
+   et la fusion BM25+e5, qui monte à 80 % sur cette catégorie, mériterait
+   d'être rouverte.
 5. **Si un modèle de récupération asymétrique multilingue plus petit
    apparaît.** Le choix d'embeddinggemma repose sur le catalogue `fastembed`
    d'aujourd'hui. La mesure du §2 dit que le critère n'est pas la taille mais
@@ -722,15 +783,26 @@ Chacune de ces conditions est une mesure à faire, pas une opinion à réviser.
    seul changement qui rendrait cette décision facile.
 6. **Si le corpus grandit** (décrets, conventions collectives, jurisprudence).
    Les 588 articles non vides tiennent dans 1 806 336 octets de vecteurs
-   (588 × 768 flottants de 4 octets, relevé sur la matrice elle-même) et le
-   produit scalaire contre cette matrice entière est mesuré à **0,037 ms de
-   médiane sur les 64 questions, soit 0,2 % des 20,27 ms** — c'est-à-dire que
-   la recherche ne coûte presque rien et que le temps de réponse part dans le
-   plongement de la question. Tout ce document suppose un corpus parcouru
-   intégralement à chaque requête ; le terme scalaire est linéaire en nombre
-   d'articles, donc à 50 000 articles il vaudrait quelques millisecondes et
-   deviendrait comparable au plongement — c'est là que l'hypothèse tombe, qu'un
-   index approché devient nécessaire et que l'arbitrage est à refaire.
+   (588 × 768 flottants de 4 octets, relevé sur la matrice elle-même par
+   `cout.py`, champ `octets_matrice`) et le produit scalaire contre cette
+   matrice entière pèse **moins de 0,2 % du temps d'une question**, soit de
+   l'ordre de 1 pour 600 — c'est-à-dire que la recherche ne coûte rien devant
+   le plongement de la question, où part tout le reste. C'est le rapport qui
+   est écrit et non la fraction de milliseconde qui le porte : le rapport se
+   retrouve sur n'importe quelle machine, la milliseconde non. Tout ce document
+   suppose un corpus parcouru intégralement à chaque requête ; le terme
+   scalaire est linéaire en nombre d'articles, et le seul rapport publié
+   ci-dessus suffit à en tirer les seuils, sans mesure nouvelle. Multiplier le
+   corpus par 85 — 50 000 articles — porterait ce terme à **85 / (599 + 85)** du
+   temps de réponse, soit **environ un huitième** ; le dixième est franchi vers
+   **40 000 articles**, et il faudrait de l'ordre de **350 000 articles**
+   (588 × 600) pour qu'il rejoigne le plongement. C'est là que l'hypothèse
+   tombe, qu'un index approché devient nécessaire et que l'arbitrage est à
+   refaire — et c'est la bonne nouvelle de ce point : un corpus de décrets et de
+   conventions collectives resterait très loin de ce seuil. Une version
+   antérieure de ce paragraphe écrivait « encore moins d'un dixième à 50 000
+   articles » : c'était une conséquence arithmétique fausse du rapport que la
+   phrase d'à côté publiait, et elle surévaluait la marge d'un quart.
 
 ---
 
@@ -760,7 +832,10 @@ PY=../prototypes/vectoriel/.venv/Scripts/python.exe
 MODELE=../prototypes/vectoriel/.cache_modeles/models--qdrant--paraphrase-multilingual-MiniLM-L12-v2-onnx-Q/snapshots/faf4aa4225822f3bc6376869cb1164e8e3feedd0
 
 # §2 et §7 : les trois candidats, les quatre modèles denses, le bras lexical
-# seul (0,11 s d'indexation, 0,43 ms par question)
+# seul (0,11 s d'indexation, moins d'une milliseconde par question). C'est
+# aussi cette commande qui donne les colonnes `ms_par_question` dont le §7
+# tire le rapport e5/gemma — un rapport parce que les deux durées y sont
+# relevées sous la même charge.
 MIZAN_MODELE="$MODELE" $PY comparer.py \
     Lexical VectorielGemma VectorielE5 VectorielMiniLM VectorielPotion \
     HybrideRRF HybrideScores HybrideAbstention \
@@ -812,12 +887,18 @@ jeu annonce (`mots` 30,7 / 46,5 / 50,9 ; `idf` 32,5 / 44,7 / 47,4). C'est le
 premier contrôle qui a été fait, et c'est lui qui autorisait à faire confiance
 au reste du banc.
 
-Ce bloc a été exécuté d'un bout à l'autre, dans cet ordre, après la dernière
-écriture de ce document : **les douze commandes sortent en code 0**, et chaque
-rappel écrit ci-dessus se relit dans leur sortie. La seule exception est
-`froid.py`, lancé avec `--relire` dans cette passe finale : son indexation
-complète, elle, a tourné deux fois plus tôt dans la même session, et c'est
-d'elle que viennent les 727,5 s et les 9 622,8 Mo du §6.
+Ce bloc a été exécuté d'un bout à l'autre, dans cet ordre, le 4 octobre 2026 :
+**les douze commandes sortent en code 0**, et chaque rappel écrit ci-dessus se
+relit dans leur sortie. Ce contrôle valide les rappels ; il ne valide pas les
+durées, et par construction il ne peut pas — il les redonne différentes à
+chaque passe, ce qui est précisément la raison pour laquelle le §6 n'en publie
+plus aucune comme une valeur. La seule exception du bloc est `froid.py`, lancé
+avec `--relire` : son indexation complète ne tourne pas à chaque passe, et
+c'est d'elle que viennent le quart d'heure et les dix gigaoctets du §6.
+`res_froid.json` dit par son drapeau `mesures_de_temps_relues` que ses durées
+sont celles d'une exécution antérieure. Enfin, la seule commande de ce document
+qui ne figure pas dans ce bloc est celle du centrage anti-hubness, que le §7
+nomme à sa ligne.
 
 ### Ce qu'il faut savoir avant de comparer un rejeu à ce document
 

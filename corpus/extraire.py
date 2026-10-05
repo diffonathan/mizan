@@ -1035,6 +1035,55 @@ def contre_verifier(structure: Structure) -> dict[str, object]:
     }
 
 
+# ──────────────────────────────────────────────────────────────────────────────────────────
+# Statistiques de forme
+# ──────────────────────────────────────────────────────────────────────────────────────────
+
+def statistiques(structure: Structure) -> dict[str, object]:
+    """Caractérise la FORME des articles : longueur et nombre d'alinéas.
+
+    Ces chiffres sont publiés dans VERIFICATION.md § 2 et § 3.1. Ils étaient
+    exacts, mais aucune commande du dépôt ne les imprimait : personne ne
+    pouvait donc les contredire, ce qui est pire qu'un chiffre faux — un
+    chiffre faux se corrige, un chiffre invérifiable ne se corrige jamais.
+    Cette fonction leur donne la commande qui les reproduit.
+
+    Ce sont des comptages sur le corpus, pas des durées : quiconque clone le
+    dépôt retrouve exactement les mêmes valeurs.
+
+    La longueur d'un article est mesurée comme au contrôle 11, sur ses alinéas
+    joints par un saut de ligne, pour qu'un seul chiffre circule dans tout le
+    fichier.
+
+    La médiane est prise sur les articles NON VIDES. L'article 256, abrogé donc
+    vide, n'est pas une longueur d'article : l'y inclure ferait bouger la
+    médiane sans que rien du corpus ait changé. Leur nombre étant pair, la
+    médiane est la demi-somme des deux valeurs centrales : elle peut donc ne
+    correspondre à la longueur d'aucun article, et c'est le cas ici.
+    """
+    mesures = [
+        (len("\n".join(a.paragraphes)), len(a.paragraphes), a.numero)
+        for a in structure.articles
+        if "".join(a.paragraphes).strip()
+    ]
+    mesures.sort()
+    longueurs = [m[0] for m in mesures]
+    milieu = len(longueurs) // 2
+    if len(longueurs) % 2 == 0:
+        mediane = (longueurs[milieu - 1] + longueurs[milieu]) / 2
+    else:
+        mediane = longueurs[milieu]
+    court, long_ = mesures[0], mesures[-1]
+    return {
+        "non_vides": len(mesures),
+        "mediane_caracteres": mediane,
+        "plus_court": {"numero": court[2], "caracteres": court[0],
+                       "alineas": court[1]},
+        "plus_long": {"numero": long_[2], "caracteres": long_[0],
+                      "alineas": long_[1]},
+    }
+
+
 # ───────────────────────────────────────────────────────────────────────────────
 # Sortie
 # ───────────────────────────────────────────────────────────────────────────────
@@ -1127,6 +1176,9 @@ def main() -> int:
     analyse.add_argument("--contre-verifier", action="store_true",
                          help="recompare les articles à un nettoyage "
                               "purement textuel du PDF")
+    analyse.add_argument("--statistiques", action="store_true",
+                         help="imprime longueur médiane, article le plus "
+                              "court et le plus long")
     options = analyse.parse_args()
 
     if not PDF.exists():
@@ -1160,6 +1212,20 @@ def main() -> int:
             print(f"  - {echec}", file=sys.stderr)
         return 1
     print("\ntous les controles passent")
+
+    if options.statistiques:
+        stats = statistiques(structure)
+        court, long_ = stats["plus_court"], stats["plus_long"]
+        mediane = stats["mediane_caracteres"]
+        mediane = int(mediane) if float(mediane).is_integer() else mediane
+        print("\nstatistiques de forme des articles")
+        print(f"  articles non vides           {stats['non_vides']}"
+              " (l'article 256, abroge, est vide)")
+        print(f"  longueur mediane             {mediane} caracteres")
+        print(f"  plus court                   article {court['numero']}, "
+              f"{court['caracteres']} caracteres")
+        print(f"  plus long                    article {long_['numero']}, "
+              f"{long_['caracteres']} caracteres, {long_['alineas']} alineas")
 
     if options.contre_verifier:
         contre = contre_verifier(structure)
