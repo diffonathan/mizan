@@ -92,8 +92,9 @@ def _resultat(numeros=("35", "36", "63", "41", "39"), question="question") -> Re
         sur=True,
         pourquoi="Phrase d'explication.",
         avertissement=AVERTISSEMENT,
+        proximite=0.62,
+        seuil_proximite=0.46,
         marge=0.12,
-        seuil_marge=0.04,
     )
 
 
@@ -116,8 +117,14 @@ class Detection(unittest.TestCase):
     def test_le_jeu_porte_bien_cinq_injections(self):
         # Si ce nombre change, les chiffres de SECURITE.md ne portent plus sur
         # le même jeu : le test le dit avant que les autres mentent.
+        #
+        # Les 88 questions légitimes étaient 59 avant l'élargissement de
+        # l'ensemble hors corpus (7 → 36 questions, evaluation/METHODE.md
+        # § 1.1). Les 29 ajoutées sont toutes `sans_reponse` et aucune ne porte
+        # de consigne injectée : le compte d'injections ne bouge pas, et c'est
+        # précisément ce que ces deux assertions ensemble vérifient.
         self.assertEqual(len(INJECTIONS), 5)
-        self.assertEqual(len(LEGITIMES), 59)
+        self.assertEqual(len(LEGITIMES), 88)
 
     def test_les_cinq_injections_sont_signalees(self):
         for q in INJECTIONS:
@@ -505,8 +512,9 @@ class FrontiereDesDonnees(unittest.TestCase):
                 sur=False,
                 pourquoi="p",
                 avertissement="  ",
+                proximite=0.0,
+                seuil_proximite=0.46,
                 marge=0.0,
-                seuil_marge=0.04,
             )
 
 

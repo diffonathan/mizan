@@ -83,9 +83,31 @@ def _pc(v) -> str:
     return "   —" if v is None else f"{v * 100:4.1f}"
 
 
-def imprimer(lignes: list[dict]) -> None:
+def effectifs(jeu: dict) -> tuple[int, int, int]:
+    """Compte le jeu au lieu de le réciter : total, répondables, sans réponse.
+
+    Ces trois nombres étaient écrits en dur, dans l'en-tête et dans la légende
+    de la table. Ils y sont restés quand le jeu hors corpus est passé de 7 à
+    36 questions, et la sortie a continué d'annoncer un jeu que le banc ne
+    mesurait plus. C'est la pire place possible pour une valeur périmée : un
+    relecteur qui vérifie un document CONTRE cette sortie y trouve le mauvais
+    chiffre confirmé, et la règle de la commande lui donne alors une fausse
+    assurance au lieu d'une garantie. Comptés ici, les trois se corrigent
+    d'eux-mêmes au prochain élargissement du jeu.
+
+    La source est le jeu lui-même, et le critère est celui du banc :
+    `articles_attendus` vide veut dire « le Code ne répond pas ».
+    """
+    questions = jeu["questions"]
+    repondables = sum(1 for q in questions if q.get("articles_attendus"))
+    return len(questions), repondables, len(questions) - repondables
+
+
+def imprimer(lignes: list[dict], jeu: dict) -> None:
+    total, repondables, sans_reponse = effectifs(jeu)
     print()
-    print("  BANC INDÉPENDANT — 64 questions, 57 répondables, 7 sans réponse")
+    print(f"  BANC INDÉPENDANT — {total} questions, {repondables} répondables, "
+          f"{sans_reponse} sans réponse")
     print("  " + "=" * 108)
     print(f"  {'approche':30} {'@1':>5} {'@3':>5} {'@5':>5} │ "
           f"{'usager':>6} {'code':>5} {'multi':>5} {'voisi':>5} {'hors':>5} {'inject':>6} │ "
@@ -98,9 +120,10 @@ def imprimer(lignes: list[dict]) -> None:
               f"{_pc(p['voisine']):>5} {_pc(p['hors_code']):>5} {_pc(p['injection']):>6} │ "
               f"{_pc(l['abstention']):>5} {_pc(l['derobade']):>5}")
     print("  " + "=" * 108)
-    print("  Lecture : rappel macro par question, en %. « abst » = abstention correcte")
-    print("  sur les 7 questions sans réponse ; « dérob » = silence sur une question")
-    print("  répondable. Les deux dernières colonnes se lisent ENSEMBLE.")
+    print("  Lecture : rappel macro par question, en %. « abst » = abstention")
+    print(f"  correcte sur les {sans_reponse} questions sans réponse ; « dérob » =")
+    print(f"  silence sur une des {repondables} questions répondables. Les deux")
+    print("  dernières colonnes se lisent ENSEMBLE.")
     print()
     print(f"  {'approche':30} {'indexation (s)':>16} {'ms / question':>16}")
     print("  " + "-" * 64)
@@ -139,10 +162,18 @@ def principal(argv=None) -> int:
             for l in res.lignes
         ]
 
-    imprimer(lignes)
+    imprimer(lignes, jeu)
     if options.sortie:
+        total, repondables, sans_reponse = effectifs(jeu)
         options.sortie.write_text(
-            json.dumps({"table": lignes, "detail": details},
+            # Le JSON porte l'effectif du jeu mesuré, et pas seulement la
+            # table : un rejeu comparé à un ancien fichier doit pouvoir
+            # constater que le jeu a changé, au lieu de comparer des
+            # pourcentages portant sur deux populations différentes.
+            json.dumps({"jeu": {"questions": total,
+                                "repondables": repondables,
+                                "sans_reponse": sans_reponse},
+                        "table": lignes, "detail": details},
                        ensure_ascii=False, indent=2),
             encoding="utf-8",
         )

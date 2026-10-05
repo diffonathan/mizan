@@ -60,10 +60,130 @@ def _article(numero: str, bras: str = "dense", score: float = 0.5):
     )
 
 
-def _moteur_idf(seuil: float = module_recherche.SEUIL_MARGE):
+def _moteur_idf(seuil: float = module_recherche.SEUIL_PROXIMITE):
     return module_recherche.Moteur(
         _CORPUS, bbb.BrasDenseIdf(_CORPUS.articles), seuil
     )
+
+
+class CompositionDuJeuHorsCorpus(unittest.TestCase):
+    """Épingle la composition de l'ensemble hors corpus et sa coupe en deux.
+
+    Ces nombres sont publiés dans evaluation/METHODE.md § 1.2 et imprimés par
+    `python banc.py --couverture`. Ils sont épinglés ici parce qu'ils ne sont
+    pas un détail de forme : c'est sur eux que se lit tout taux d'abstention.
+    Un ensemble hors corpus qui se remplirait de questions faciles, ou dont la
+    coupe se déséquilibrerait, ferait monter le taux sans que rien s'améliore —
+    exactement ce qui a fait publier 85,7 % d'abstention mesurés sur sept
+    questions d'un seul genre.
+
+    Un test qui échoue ici ne dit pas « le code est cassé » : il dit « la
+    composition du jeu a changé, va corriger METHODE.md § 1.2 avant de publier
+    un chiffre ».
+    """
+
+    def setUp(self):
+        self.jeu = banc.charger_questions()
+        self.hors = [q for q in self.jeu["questions"]
+                     if "sans_reponse" in q["etiquettes"]]
+
+    def test_effectifs_par_famille(self):
+        attendu = {"etrangere": 6, "autre_branche": 8, "travail_hors_corpus": 8,
+                   "limitrophe": 8, "mal_posee": 6}
+        obtenu = {f: sum(1 for q in self.hors if q["famille_hors_corpus"] == f)
+                  for f in attendu}
+        self.assertEqual(obtenu, attendu)
+        self.assertEqual(len(self.hors), 36)
+        self.assertEqual(len(self.jeu["questions"]), 93)
+        self.assertEqual(
+            sum(1 for q in self.jeu["questions"] if q["articles_attendus"]), 57)
+
+    def test_la_coupe_est_de_dix_huit_contre_dix_huit(self):
+        comptes = {v: sum(1 for q in self.hors if q["volet"] == v)
+                   for v in banc.VOLETS}
+        self.assertEqual(comptes, {"reglage": 18, "verification": 18})
+
+    def test_chaque_famille_est_coupee_en_deux(self):
+        # Une coupe équilibrée EN BLOC ne suffit pas : on pourrait mettre toutes
+        # les questions franchement étrangères d'un côté et toutes les
+        # limitrophes de l'autre, et la moitié de vérification serait alors
+        # beaucoup plus dure que celle de réglage sans que le total le montre.
+        for famille in banc.FAMILLES_HORS_CORPUS:
+            lot = [q for q in self.hors if q["famille_hors_corpus"] == famille]
+            reglage = sum(1 for q in lot if q["volet"] == "reglage")
+            with self.subTest(famille=famille):
+                self.assertLessEqual(abs(2 * reglage - len(lot)), 1)
+
+    def test_les_deux_cles_sont_exactement_sur_les_questions_hors_corpus(self):
+        for q in self.jeu["questions"]:
+            hors = "sans_reponse" in q["etiquettes"]
+            with self.subTest(q=q["id"]):
+                self.assertEqual("famille_hors_corpus" in q, hors)
+                self.assertEqual("volet" in q, hors)
+
+    def test_le_jeu_livre_passe_les_controles_du_banc(self):
+        self.assertEqual(
+            banc.controler_jeu(self.jeu, banc.charger_corpus()), [])
+
+
+class LeBancRefuseUneCompositionQuiDerive(unittest.TestCase):
+    """Le contrôle du banc sur lui-même, côté hors corpus.
+
+    Un contrôle qu'on n'a jamais vu refuser quoi que ce soit n'est pas un
+    contrôle. Chaque dérive possible est donc fabriquée ici, et le banc doit la
+    nommer — sinon il laisserait passer un jeu dont le taux d'abstention ne
+    voudrait plus rien dire, et le dirait avec aplomb.
+    """
+
+    def setUp(self):
+        self.corpus = banc.charger_corpus()
+
+    def _jeu_avec(self, **remplacements):
+        jeu = banc.charger_questions()
+        for ident, modif in remplacements.items():
+            for q in jeu["questions"]:
+                if q["id"] == ident:
+                    q.update(modif)
+        return jeu
+
+    def test_famille_inconnue_refusee(self):
+        anomalies = banc.controler_jeu(
+            self._jeu_avec(Q64={"famille_hors_corpus": "bizarre"}), self.corpus)
+        self.assertTrue(any("famille_hors_corpus" in a and "Q64" in a
+                            for a in anomalies), anomalies)
+
+    def test_volet_inconnu_refuse(self):
+        anomalies = banc.controler_jeu(
+            self._jeu_avec(Q64={"volet": "plus tard"}), self.corpus)
+        self.assertTrue(any("volet" in a and "Q64" in a for a in anomalies),
+                        anomalies)
+
+    def test_famille_manquante_refusee(self):
+        jeu = banc.charger_questions()
+        for q in jeu["questions"]:
+            if q["id"] == "Q64":
+                del q["famille_hors_corpus"]
+        self.assertTrue(any("Q64" in a for a in banc.controler_jeu(jeu, self.corpus)))
+
+    def test_famille_sur_une_question_repondable_refusee(self):
+        # Une question qui a une réponse dans le Code ne peut pas déclarer une
+        # façon d'être hors corpus : elle gonflerait le dénominateur d'un taux
+        # d'abstention auquel elle n'appartient pas.
+        anomalies = banc.controler_jeu(
+            self._jeu_avec(Q01={"famille_hors_corpus": "limitrophe",
+                                "volet": "reglage"}), self.corpus)
+        self.assertTrue(any("Q01" in a for a in anomalies), anomalies)
+
+    def test_coupe_desequilibree_refusee(self):
+        # Tout le côté « etrangere » basculé en réglage : le total resterait
+        # presque équilibré, la famille ne le serait plus.
+        jeu = banc.charger_questions()
+        for q in jeu["questions"]:
+            if q.get("famille_hors_corpus") == "etrangere":
+                q["volet"] = "reglage"
+        anomalies = banc.controler_jeu(jeu, self.corpus)
+        self.assertTrue(any("etrangere" in a and "coupe" in a
+                            for a in anomalies), anomalies)
 
 
 class ContratDeReponse(unittest.TestCase):
@@ -252,9 +372,12 @@ class GardeDuRepondeurTemoin(unittest.TestCase):
 
     def setUp(self):
         self.moteur = _moteur_idf()
-        # Un seuil de marge nul force la rédaction sur toutes les questions :
-        # on teste ici la garde, pas l'abstention par la marge.
-        self.moteur_bavard = _moteur_idf(0.0)
+        # Un seuil que la proximité franchit toujours : on teste ici la garde,
+        # pas l'abstention. Moins l'infini plutôt que zéro, parce que le signal
+        # d'abstention est un cosinus, qui peut être négatif — un seuil à zéro
+        # ferait encore taire une question, et le « répondeur bavard » ne serait
+        # plus bavard sans que rien ne le dise.
+        self.moteur_bavard = _moteur_idf(float("-inf"))
 
     def _temoin(self, redacteur, moteur=None):
         return bbb.RepondeurTemoin(moteur or self.moteur_bavard, redacteur,
@@ -312,10 +435,16 @@ class GardeDuRepondeurTemoin(unittest.TestCase):
                 appels.append(question)
                 return f"L'article {articles[0].numero} du Code."
 
-        # Un seuil de marge inatteignable : la récupération doute toujours, et
-        # aucune rédaction ne doit être demandée — ni payée, le jour où elle
-        # coûtera une requête à un fournisseur.
-        temoin = bbb.RepondeurTemoin(_moteur_idf(1.1), Compteur(), _NUMEROS)
+        # Un seuil inatteignable : la récupération doute toujours, et aucune
+        # rédaction ne doit être demandée — ni payée, le jour où elle coûtera
+        # une requête à un fournisseur.
+        #
+        # L'infini, et non 1,1 comme du temps de la marge : la marge était un
+        # rapport borné par 1, alors que le bras dense FACTICE de ce banc note
+        # en idf et non en cosinus. Un score idf dépasse 1,1 sans peine, et ce
+        # test passait en mesurant le contraire de ce qu'il annonce.
+        temoin = bbb.RepondeurTemoin(_moteur_idf(float("inf")), Compteur(),
+                                     _NUMEROS)
         reponse = temoin.repondre("congé annuel payé")
         self.assertTrue(reponse.abstenu)
         self.assertEqual(appels, [])
@@ -331,14 +460,14 @@ class MesuresDuBanc(unittest.TestCase):
         self.modes = {
             "generation": "(test)", "familles": "(test)", "recuperation": "idf",
             "repondeur": "(test)", "observe": True, "production": False,
-            "seuil_marge": 0.0, "k": 5,
+            "seuil_proximite": -1.0, "k": 5,
         }
 
     def _executer(self, redacteur, seuil=0.0):
         observateur = bbb.RedacteurObserve(redacteur, _NUMEROS)
         temoin = bbb.RepondeurTemoin(_moteur_idf(seuil), observateur, _NUMEROS)
         return bbb.executer(temoin.repondre, self.jeu, _NUMEROS, observateur,
-                            dict(self.modes, seuil_marge=seuil))
+                            dict(self.modes, seuil_proximite=seuil))
 
     def test_le_temoin_loyal_ne_fait_rejeter_personne(self):
         loyal = bbb.RedacteurFactice(sorted(_NUMEROS, key=bbb._ordre_numero),
@@ -419,7 +548,18 @@ class MesuresDuBanc(unittest.TestCase):
         observateur = bbb.RedacteurObserve(loyal, _NUMEROS)
         zele = RepondeurMuet(_moteur_idf(0.0), observateur)
         res = bbb.executer(zele.repondre, self.jeu, _NUMEROS, observateur, self.modes)
-        self.assertEqual(len(res.rejets_a_tort()), len(res.lignes))
+        # Un rejet à tort suppose une rédaction LOYALE à rejeter, c'est-à-dire
+        # qui cite au moins un article. Sur les questions où la récupération ne
+        # ramène rien, le rédacteur loyal n'a rien à citer et retombe sur une
+        # rédaction muette : il n'y a alors rien à rejeter à tort. L'égalité se
+        # pose donc sur les rédactions loyales, et non sur les 93 lignes du jeu.
+        # Depuis l'élargissement de l'ensemble hors corpus, deux questions sont
+        # dans ce cas — Q65 « Coupe du monde 2018 » et Q67 « capitale de
+        # l'Australie », dont aucun mot n'est dans le Code : le bras idf sort à
+        # vide. C'est une propriété du jeu, pas de la garde.
+        loyales = [l for l in res.lignes if l.loyale]
+        self.assertEqual(len(res.rejets_a_tort()), len(loyales))
+        self.assertEqual(len(loyales), len(res.lignes) - 2)
         self.assertEqual(res.derobade(), 1.0)
 
     def test_les_toleres_ne_comptent_ni_en_reussite_ni_en_faute(self):
@@ -570,7 +710,9 @@ class EntreeEnLigneDeCommande(unittest.TestCase):
             self.assertEqual(code, 0)
             rapport = json.loads(chemin.read_text(encoding="utf-8"))
             self.assertIs(rapport["production"], False)
-            self.assertEqual(rapport["questions"], 64)
+            # 93 depuis l'élargissement de l'ensemble hors corpus de 7 à 36
+            # questions (evaluation/METHODE.md § 1.1) ; 64 auparavant.
+            self.assertEqual(rapport["questions"], 93)
             self.assertEqual(rapport["invariants"]["fuites"], [])
 
     def test_une_recuperation_inconnue_est_refusee(self):

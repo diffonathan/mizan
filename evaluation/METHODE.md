@@ -5,11 +5,19 @@ articles** sur lesquels il s'appuie. Cette page existe parce que l'affirmation
 précédente ne vaut rien tant qu'elle n'est pas un nombre que quelqu'un d'autre
 peut recalculer.
 
-Tous les chiffres de cette page viennent d'exécutions faites le **4 octobre
-2026** sur le corpus `../corpus/code-travail.json` (589 articles, Code du
-travail consolidé au 26 octobre 2011, portail Adala). La commande qui produit
-chacun est donnée. Aucun chiffre n'est estimé, arrondi à la hausse, ni repris
-d'ailleurs.
+Tous les chiffres de cette page viennent d'exécutions faites sur le corpus
+`../corpus/code-travail.json` (589 articles, Code du travail consolidé au
+26 octobre 2011, portail Adala) — les mesures de récupération le 4 octobre
+2026, l'élargissement de l'ensemble hors corpus décrit au § 1.2 le 5 octobre
+2026. La commande qui produit chacun est donnée. Aucun chiffre n'est estimé,
+arrondi à la hausse, ni repris d'ailleurs.
+
+Et la règle qui s'applique à toute proportion écrite ici, parce qu'elle a été
+payée cher : **un taux dit toujours sur combien de cas il est calculé, à
+l'endroit où il est écrit.** « 85,7 % » valait six réussites sur sept
+questions ; écrit « 6 / 7 », il n'aurait pas pu être lu comme une garantie.
+Le banc imprime donc désormais le décompte à côté de chaque taux, et non le
+seul effectif.
 
 ---
 
@@ -17,11 +25,12 @@ d'ailleurs.
 
 ```
 python banc.py              # affiche l'effectif et les effectifs par catégorie
-python banc.py --couverture # ajoute le recensement de la vérité de référence
+python banc.py --couverture # ajoute le recensement de la vérité de référence,
+                            # la composition de l'ensemble hors corpus
                             # et la part du Code touchée, livre par livre
 ```
 
-**64 questions**, dont **57 ont une réponse** dans le corpus et **7 n'en ont
+**93 questions**, dont **57 ont une réponse** dans le corpus et **36 n'en ont
 pas**. Les 57 questions répondables citent **70 fois un article attendu**, soit
 **57 articles distincts** du Code. Les listes d'articles « tolérés » nomment
 **132 articles distincts**, dont **112 qui ne sont attendus par aucune
@@ -35,7 +44,7 @@ imprime sous « Vérité de référence du jeu », et c'est de là qu'ils vienne
   Vérité de référence du jeu
   --------------------------------------------------------------
   questions répondables                           57
-  questions sans réponse dans le Code              7
+  questions sans réponse dans le Code             36
   occurrences d'article attendu                   70
   articles attendus distincts                     57
   articles tolérés distincts                     132
@@ -49,7 +58,7 @@ Code qu'il touche. L'écart vient des questions qui appellent le même article �
 c'est exactement ce que fabriquent les étiquettes `reformulation`.
 
 Les étiquettes se cumulent, donc les effectifs ci-dessous ne s'additionnent pas
-à 64 :
+à 93 :
 
 | Étiquette        | Effectif | Ce qu'elle mesure |
 |------------------|---------:|-------------------|
@@ -58,9 +67,15 @@ Les étiquettes se cumulent, donc les effectifs ci-dessous ne s'additionnent pas
 | `multi_articles` | 12 | La réponse exige plusieurs articles ; en retrouver un ne suffit pas. |
 | `voisine`        | 25 | Question appariée à une autre **avec laquelle elle ne partage aucun article attendu** : proche par les mots, différente par la réponse. Le champ `paire` nomme l'autre. |
 | `reformulation`  | 10 | Question appariée à une autre **avec laquelle elle partage au moins un article attendu** : même sujet, autre formulation. |
-| `hors_code`      |  3 | La réponse exacte n'est pas dans le Code : l'article attendu est celui qui renvoie au texte réglementaire. |
+| `hors_code`      |  3 | La réponse exacte n'est pas dans le Code : l'article attendu est celui qui renvoie au texte réglementaire. **Ce n'est pas « hors corpus »** : ces trois questions ont une vérité de référence non vide et comptent dans le rappel. |
 | `injection`      |  5 | La question porte une consigne destinée à détourner le système. |
-| `sans_reponse`   |  7 | Le Code ne répond pas ; la vérité de référence est une liste vide. |
+| `sans_reponse`   | 36 | Le Code ne répond pas ; la vérité de référence est une liste vide. **C'est la seule étiquette qui désigne une question hors corpus**, et la seule où réussir consiste à se taire. Composition détaillée au § 1.2. |
+
+Les deux noms se ressemblent et ils ont déjà été confondus, y compris dans une
+revue de ce dépôt : `hors_code` veut dire « le Code renvoie ailleurs pour le
+chiffre », `sans_reponse` veut dire « le Code ne traite pas le sujet ». Un taux
+d'abstention calculé sur `hors_code` n'aurait aucun sens, puisque la bonne
+conduite y est de CITER l'article de renvoi.
 
 `voisine` et `reformulation` ne sont pas deux manières de dire « appariée » :
 elles se distinguent par un critère mécanique, le recoupement des articles
@@ -71,11 +86,155 @@ exigés des deux côtés : une paire déclarée dans un seul sens est une anomal
 Deux questions portent les deux étiquettes, parce qu'elles ont plusieurs paires
 (Q07 et Q28).
 
-Les 7 questions sans réponse ne sont pas un ornement. Pour un assistant
+Les 36 questions sans réponse ne sont pas un ornement. Pour un assistant
 juridique, inventer un article est une défaillance d'une autre nature qu'un
 rappel médiocre : un rappel médiocre fait perdre du temps, un article inventé
 fait prendre un risque juridique à quelqu'un qui croyait être couvert. C'est la
 seule catégorie où réussir consiste à se taire.
+
+### 1.1 Pourquoi l'ensemble hors corpus a été élargi
+
+Parce que sept ne mesuraient rien, et qu'on l'a su en les comptant. Le taux
+d'abstention alors publié, au point de fonctionnement d'alors — **85,7 %** —
+valait **6 réussites sur 7 questions**. Une seule question qui changeait de camp le
+déplaçait de 14,3 points, et les sept étaient toutes du même genre : un sujet
+franchement étranger (avocat, impôt sur les sociétés, permis de conduire) ou un
+sujet de droit du travail absent du Code (télétravail, sabbatique, treizième
+mois, AMO). Aucune question d'une autre branche du droit, aucune question
+limitrophe, aucune question mal posée.
+
+Ce n'était donc pas un réglage à retoucher : c'était **une mesure qui ne
+généralise pas, publiée comme une garantie**. Et le reproche porte sur la
+composition du jeu, pas sur le seuil — un seuil ne peut pas être meilleur que
+l'ensemble sur lequel on le lit.
+
+Ce qui a été fait, et ce qui ne l'a pas été : les 29 questions ajoutées sont
+toutes `sans_reponse`, et **aucune des 64 questions d'origine n'a été touchée** —
+ni formulation, ni étiquette, ni vérité de référence. Les deux clés
+`famille_hors_corpus` et `volet` ont seulement été ajoutées aux 7 questions
+hors corpus déjà présentes. C'est vérifiable autrement que sur parole : le
+rappel@3 du plancher `mots` est de **46,5 %** avant comme après, et celui
+d'`idf` de **44,7 %** — élargir l'ensemble hors corpus ne pouvait pas déplacer
+le rappel, et ne l'a pas déplacé.
+
+### 1.2 Les cinq façons d'être hors corpus
+
+Trente questions toutes du même genre ne valent pas mieux que sept. Ce qui fait
+la mesure, ce n'est pas l'effectif, c'est la **variété des façons d'être hors
+corpus** — et chacune met en difficulté un étage différent du système. Chaque
+question `sans_reponse` déclare donc la sienne dans `famille_hors_corpus`, et
+`banc.py` rend l'abstention famille par famille.
+
+```
+python banc.py --couverture   # imprime le tableau ci-dessous
+```
+
+```
+  Composition de l'ensemble hors corpus
+  --------------------------------------------------------------
+                            total   réglage   vérif.
+  etrangere                     6         3        3
+  autre_branche                 8         4        4
+  travail_hors_corpus           8         4        4
+  limitrophe                    8         4        4
+  mal_posee                     6         3        3
+  ensemble hors corpus         36        18       18
+  questions du jeu             93
+```
+
+| Famille | Effectif | Ce qu'elle met en difficulté | Exemple du jeu |
+|---|---:|---|---|
+| `etrangere` | 6 | Rien, et c'est le but : c'est le **plancher**. Aucun mot porteur n'est dans le Code. Un système qui répond ici répond à n'importe quoi. | Q64 « la recette du couscous aux sept légumes » |
+| `autre_branche` | 8 | Le **vocabulaire juridique partagé**. Le Code du travail compte 48 articles portant « amende », 17 portant « tribunal », 6 portant « jugement » : une question de droit pénal ou de procédure lui ressemble de très près. C'est le cas qui piège le plus un système de plongements. | Q69 « la peine pour un vol avec effraction » — « vol » est à l'art. 39, comme faute grave |
+| `travail_hors_corpus` | 8 | L'**honnêteté sur la frontière du corpus**. La question est du droit du travail et elle est légitime ; le corpus n'a simplement pas la réponse — jurisprudence, convention collective de branche, texte postérieur au 26 octobre 2011. | Q77 « quel préavis avant de déclencher une grève » — « préavis » est partout dans le Code, la procédure de grève n'y est pas |
+| `limitrophe` | 8 | La **qualité du seuil**, là où elle se joue vraiment. Le Code emploie le terme sans donner la règle demandée : sécurité sociale, retraite, impôt sur le revenu du salarié. | Q81 « le taux de cotisation salariale à la CNSS » — la Caisse est nommée dans 12 articles, le taux dans aucun |
+| `mal_posee` | 6 | Le **passage de la récupération à l'affirmation**. Trop vague, sans question, un seul mot. | Q87 « congé » ; Q89 « Est-ce légal ? » |
+
+`mal_posee` est la famille la plus discutable sur un banc de **récupération**,
+et il faut le dire plutôt que de l'enterrer dans une moyenne : renvoyer
+l'art. 231 sur « congé » n'est pas une faute de récupération, c'est même le
+comportement attendu d'un moteur de recherche. Ce qui serait fautif est
+d'**affirmer que le Code répond** à une question qui n'a pas été posée. C'est
+une raison de plus pour que le banc n'imprime jamais le seul taux global : le
+tableau par famille permet de lire les cinq nombres séparément, et de retirer
+celui-là si on juge qu'il ne mesure pas la récupération.
+
+Les familles ne sont pas crues sur parole. `banc.py` refuse de mesurer — code de
+sortie 2 — si une question `sans_reponse` ne porte pas de famille connue, si une
+question répondable en porte une, ou si l'une des deux clés manque. Les cinq
+noms sont déclarés dans `banc.py` (`FAMILLES_HORS_CORPUS`) et leur sens dans
+`questions.json`, section `meta`.
+
+### 1.3 La coupe : une moitié pour régler, une moitié qu'on n'a pas regardée
+
+Le seuil de **marge** qui décidait alors du silence a été lu sur les questions
+qui servaient ensuite à le valider. C'est la cause directe des 85,7 % : non pas
+un mauvais calcul, mais **l'absence d'échantillon de validation**. L'ensemble hors corpus est donc coupé en deux
+**avant tout réglage**, et la coupe est inscrite dans le fichier :
+
+- `volet: "reglage"` — **18 questions** sur lesquelles on a le droit de regarder
+  les scores, de choisir le signal d'abstention et d'en poser le seuil ;
+- `volet: "verification"` — **18 questions** mises de côté, qui ne servent qu'à
+  la vérification finale, une fois le seuil figé.
+
+La coupe est posée par une **règle** et non au cas par cas : au sein de chaque
+famille, les questions triées par identifiant sont affectées en alternance, en
+commençant par `reglage`. Choisir à la main quelle question va de quel côté
+rouvrirait exactement la porte qu'on vient de fermer. La règle se relit sur le
+fichier, et `banc.py` vérifie que **chaque famille reste coupée en deux à une
+question près** : il suffirait d'ajouter trois questions faciles du même côté
+pour que la moitié de vérification cesse de ressembler à l'autre, et le chiffre
+final redeviendrait un artefact de composition.
+
+```
+python banc.py --recuperation <...>   # rend l'abstention par famille,
+                                      # puis de part et d'autre de la coupe
+```
+
+Ce que cela coûte, et il faut le dire avant que quelqu'un d'autre le dise :
+**18 questions de validation restent peu**, un écart d'une question y vaut
+5,6 points, et par famille il ne reste que 3 ou 4 questions de chaque côté —
+ces lignes-là indiquent une direction, pas une valeur. Et la coupe ne protège
+plus rien le jour où un seuil est déplacé après avoir vu la moitié de
+vérification : si cela arrive, c'est à écrire ici, et la moitié est brûlée.
+
+### 1.4 Ce que cet élargissement a rendu caduc ailleurs, et comment ça a été réparé
+
+Cette page est la source unique de la **composition** du jeu ; elle ne recopie
+aucun score du système, qui ont leur propre source. Mais élargir l'ensemble a
+changé ce que mesuraient les documents appuyés dessus, et les deux défauts que
+cela a révélés sont à dire ici plutôt qu'à laisser découvrir :
+
+- `MESURES.md` et `CONCEPTION.md` publiaient une abstention correcte mesurée sur
+  les **7** anciennes questions hors corpus. Ce jeu n'existait plus sous cette
+  forme : **le chiffre publié là-bas ne décrivait plus l'ensemble qu'il
+  nommait**, et il devait être remesuré sur l'ensemble élargi, famille par
+  famille et des deux côtés de la coupe, avec son décompte écrit à côté.
+- Le seuil de **marge** qui décidait alors du silence avait été choisi sur ces
+  mêmes sept questions, et n'avait **jamais** été confronté à un échantillon de
+  validation.
+
+**CES DEUX POINTS SONT TRAITÉS.** Le signal lui-même a été remplacé : la
+décision ne se prend plus sur la marge entre les deux premiers candidats mais
+sur la **proximité** — le score dense absolu du premier article —, au seuil
+`SEUIL_PROXIMITE` de `noyau/recherche.py`. Il a été choisi sur la moitié
+`reglage` et rapporté sur la moitié `verification`, qui n'a pas servi à le
+choisir. Les effectifs des deux moitiés et celui de l'ensemble sont publiés par
+`MESURES.md` §A.3, qui en est la source unique et qui les publie en effectifs ;
+ils ne sont pas recopiés ici, parce que cette page-ci répond de la composition du
+jeu et non des scores qu'on y mesure. Ils l'étaient, et c'est exactement
+l'habitude qui a périmé la moitié du dossier.
+
+**Et l'ancien seuil n'est plus là où ce paragraphe le nommait.** Il annonçait
+« `SEUIL_MARGE = 0,04` de `noyau/recherche.py` » : cette constante a disparu de
+ce fichier, où `SEUIL_PROXIMITE` a pris sa place. Elle ne survit que sous le nom
+`SEUIL_MARGE_REMPLACE`, dans `arbitrage/abstention.py`, où elle sert à
+**retracer** l'ancienne décision pour la comparer à la nouvelle, et non à en
+prendre une. Le nom porte le passé dans sa seconde moitié, et c'est voulu : une
+constante qu'on garde pour l'histoire doit dire qu'elle est de l'histoire.
+
+Élargir l'ensemble avait rendu le défaut **mesurable** ; c'est ce qui a permis
+de le corriger, et les deux étapes ne doivent pas être confondues.
 
 Les 25 questions `voisine` sont là pour une raison précise : une récupération
 vectorielle lâche rapproche « congé annuel » de « congé de maternité » et
@@ -133,19 +292,31 @@ plausibles. Le trajet est l'inverse :
    retraite.
 3. Les questions ont été écrites **à partir de ce que les articles disent**, et
    la vérité de référence est le numéro relu dans le JSON, pas un souvenir.
-4. Pour les 7 questions sans réponse, l'absence a été **vérifiée par
-   recherche** sur les 589 articles : « avocat », « télétravail »,
-   « sabbatique », « treizième mois », « 13e mois », « assurance maladie
-   obligatoire », « AMO », « permis de conduire » — aucune occurrence. C'est un
-   contrôle, pas une impression.
+4. Pour **chacune des 36 questions sans réponse**, l'absence a été **vérifiée
+   par recherche** sur les 589 articles, avant d'écrire la question et non
+   après. Les 7 premières : « avocat », « télétravail », « sabbatique »,
+   « treizième mois », « 13e mois », « assurance maladie obligatoire », « AMO »,
+   « permis de conduire » — aucune occurrence. Les 29 ajoutées : chaque terme
+   porteur a été cherché de la même manière, accents repliés, et le résultat
+   est écrit dans la `note` de la question — y compris quand il n'est **pas**
+   nul. C'est ce qui a fait écarter plusieurs candidates qui semblaient hors
+   corpus et ne l'étaient pas : une question sur le harcèlement au travail
+   (l'art. 40 le nomme comme faute grave de l'employeur), une sur l'âge de la
+   retraite (l'art. 526 le fixe à soixante ans), une sur l'indemnité de perte
+   d'emploi (les art. 53 et 59 y renvoient, ce qui en fait un cas `hors_code`
+   et non `sans_reponse`). C'est un contrôle, pas une impression — et il a
+   changé le jeu.
 5. `banc.py` refuse de mesurer — code de sortie 2, aucun chiffre produit — si
    un seul numéro de la vérité de référence n'existe pas dans le corpus, si une
    question étiquetée `sans_reponse` porte des articles attendus, si un
    identifiant est en double, si une `paire` désigne une question inexistante,
-   si un appariement n'est pas déclaré des deux côtés, ou si l'étiquette
+   si un appariement n'est pas déclaré des deux côtés, si l'étiquette
    `voisine` ou `reformulation` contredit le recoupement réel des articles
-   attendus. Le contrôle passe sans anomalie — c'est ce qui garantit que les
-   70 articles cités existent et que les couples sont ce qu'ils annoncent, pas
+   attendus, si une question hors corpus ne déclare pas sa famille et son volet
+   (ou si une question répondable en déclare), ou si la coupe d'une famille
+   s'écarte de la moitié de plus d'une question. Le contrôle passe sans
+   anomalie — c'est ce qui garantit que les 70 articles cités existent, que les
+   couples sont ce qu'ils annoncent et que la coupe est restée équilibrée, pas
    ma parole.
 
 Deux listes par question, et la distinction compte :
@@ -196,8 +367,8 @@ Mesures produites :
 | `touche@k` | Part des questions dont **au moins un** article attendu est dans les k premiers. Plus indulgent ; donné à côté du rappel parce qu'ils ne disent pas la même chose — « touche » dit qu'on est dans le bon chapitre, « rappel » dit qu'il ne manque rien. |
 | `tous les articles @3` | Nombre de questions répondables dont **tous** les articles attendus sont dans les trois premiers. Donné parce que le rappel moyen cache la forme de la distribution : 50 % peuvent venir de la moitié des articles sur chaque question, ou de toutes les questions à moitié. |
 | `aucun article @5` | Nombre de questions répondables dont **aucun** article attendu n'est dans les cinq premiers. L'autre bout de la même distribution. |
-| `abstention` | Part des 7 questions sans réponse où la récupération n'a **rien** renvoyé. |
-| `bruit` | Nombre moyen d'articles renvoyés sur ces mêmes 7 questions. |
+| `abstention` | Part des 36 questions sans réponse où la récupération n'a **rien** renvoyé. Rendue trois fois : en bloc, **par famille** (§ 1.2) et **de part et d'autre de la coupe** (§ 1.3). Le taux en bloc ne se publie pas seul — il mélange cinq difficultés qui n'ont rien à voir, et c'est ainsi qu'un chiffre obtenu sur sept questions d'un seul genre a pu passer pour une garantie. |
+| `bruit` | Nombre moyen d'articles renvoyés sur ces mêmes 36 questions. |
 | `dérobade` | Part des 57 questions répondables où la récupération s'est abstenue. |
 | `déplacement` | Sur les 5 couples `reformulation` : nombre d'articles communs aux deux listes retrouvées, à 3 et à 5. La vérité de référence étant partagée, l'écart ne peut venir que de la formulation. |
 
@@ -218,7 +389,8 @@ Ce que cette commande rend, mot pour mot :
 | au moins un article @1 / @3 / @5 | 0,0 % / 0,0 % / 0,0 % |
 | questions dont tous les articles sont trouvés @3 | 0 / 57 |
 | questions dont aucun article n'est trouvé @5 | 57 / 57 |
-| abstention correcte (n=7) | **100,0 %** |
+| abstention correcte | **100,0 % — 36 / 36** |
+| abstention correcte, moitié de vérification | **100,0 % — 18 / 18** |
 | articles renvoyés sur une question sans réponse | 0,00 / 5 |
 | dérobade | **100,0 %** |
 
@@ -251,9 +423,34 @@ python banc.py --recuperation idf
 | au moins un article @5 | 54,4 % | 50,9 % |
 | questions dont **tous** les articles sont trouvés @3 | 25 / 57 | 24 / 57 |
 | questions dont **aucun** article n'est trouvé @5 | 26 / 57 | 28 / 57 |
-| abstention correcte (n=7) | 0,0 % | 0,0 % |
-| articles renvoyés sur une question sans réponse | 5,00 / 5 | 5,00 / 5 |
+| abstention correcte | 5,6 % — 2 / 36 | 5,6 % — 2 / 36 |
+| articles renvoyés sur une question sans réponse | 4,56 / 5 | 4,56 / 5 |
 | dérobade | 0,0 % | 0,0 % |
+
+Abstention par famille, pour les deux planchers — les deux donnent exactement
+les mêmes deux réussites :
+
+| Famille | `mots` | `idf` |
+|---|---:|---:|
+| `etrangere` (n=6) | 33,3 % — 2 / 6 | 33,3 % — 2 / 6 |
+| `autre_branche` (n=8) | 0,0 % — 0 / 8 | 0,0 % — 0 / 8 |
+| `travail_hors_corpus` (n=8) | 0,0 % — 0 / 8 | 0,0 % — 0 / 8 |
+| `limitrophe` (n=8) | 0,0 % — 0 / 8 | 0,0 % — 0 / 8 |
+| `mal_posee` (n=6) | 0,0 % — 0 / 6 | 0,0 % — 0 / 6 |
+| moitié `reglage` (n=18) | 11,1 % — 2 / 18 | 11,1 % — 2 / 18 |
+| moitié `verification` (n=18) | 0,0 % — 0 / 18 | 0,0 % — 0 / 18 |
+
+Les deux seules abstentions des planchers sont des accidents, pas une décision,
+et ce sont les mêmes deux questions pour `mots` et pour `idf` : sur Q65 (« Coupe
+du monde de football 2018 ») et Q67 (« capitale de l'Australie »), **aucun** mot
+de la question n'apparaît dans aucun article, donc il n'y a rien à classer et la
+liste sort vide. Q64 (« la recette du couscous aux sept légumes ») ne s'abstient
+pas, alors que « couscous », « recette » et « légumes » sont absents du
+Code : le seul mot « sept » suffit à produire cinq candidats. Un plancher qui
+cherche des mots ne sait pas se taire ; il ne peut que ne rien trouver. C'est la même mesure qu'avant l'élargissement — elle valait
+0 % sur 7 questions parce que les sept partageaient toutes au moins un mot avec
+le Code — et l'élargissement ne l'a pas améliorée : il l'a seulement rendue
+lisible.
 
 Par catégorie, rappel@3 :
 
@@ -327,13 +524,19 @@ question ne partagent presque aucun mot.
    fabriquer après coup la version nue de quatre questions reviendrait à
    écrire du jeu en ayant vu les scores, ce que la section 5 s'interdit.
 
-5. **Aucun des deux planchers ne sait se taire.** 0 % d'abstention, cinq
-   articles renvoyés sur cinq pour chacune des 7 questions sans réponse. Un
+5. **Aucun des deux planchers ne sait se taire.** 5,6 % d'abstention — 2 sur
+   36 — et 4,56 articles renvoyés en moyenne sur cinq possibles. Les deux
+   réussites ne sont pas des décisions mais des questions dont aucun mot n'est
+   dans le Code (voir juste au-dessus), et elles tombent toutes les deux dans
+   la famille `etrangere` : sur les quatre autres familles, **0 sur 30**. Un
    système de récupération par similarité renvoie toujours ses meilleurs
-   candidats : il n'a pas de notion de « rien ne correspond ». Ce 0 % est la
-   mesure la plus importante du tableau, parce qu'elle dit qu'un seuil de
-   confiance explicite devra être construit, et qu'il ne viendra pas tout seul
-   avec un bon modèle d'embarquement.
+   candidats ; il n'a pas de notion de « rien ne correspond ». C'est la mesure
+   la plus importante du tableau, parce qu'elle dit qu'un seuil de confiance
+   explicite devra être construit, et qu'il ne viendra pas tout seul avec un bon
+   modèle d'embarquement. Elle dit aussi où le juger : les familles
+   `autre_branche`, `travail_hors_corpus` et `limitrophe` sont celles où un
+   seuil doit gagner quelque chose, parce que le plancher y est à zéro sans
+   ambiguïté.
 
 6. **Plus savant n'est pas meilleur.** `idf` bat `mots` sur les questions en
    termes du Code (64,0 contre 60,0) et le perd sur les questions d'usager
@@ -360,17 +563,33 @@ qui a été fait pour en limiter l'effet, et qu'on peut vérifier dans l'ordre d
 fichiers : les questions ont été écrites **avant** toute récupération, en
 parallèle des travaux d'architecture et sans en connaître les choix ; les deux
 planchers ont été écrits **après** le jeu ; **aucune question n'a été reformulée
-ni aucun article retiré après avoir vu un score**. Deux modifications sont
+ni aucun article retiré après avoir vu un score**. Trois modifications sont
 postérieures à la première exécution, et aucune ne touche une vérité de
 référence : l'ajout de l'étiquette `multi_articles` sur Q01 et Q24 ; puis, à la
 revue, la séparation de `voisine` en `voisine` et `reformulation`, avec les
 appariements rendus symétriques et les deux étiquettes désormais vérifiées par
-le banc (§1). Cette seconde modification corrige une définition que le jeu
-contredisait ; elle ne déplace aucun article attendu, et le rappel global est
-le même avant et après.
+le banc (§1) ; puis, le 5 octobre 2026, l'élargissement de l'ensemble hors
+corpus de 7 à 36 questions et sa coupe en deux (§ 1.1 à 1.3). La deuxième
+corrige une définition que le jeu contredisait ; elle ne déplace aucun article
+attendu, et le rappel global est le même avant et après.
+
+**Et la troisième a été faite en ayant vu un score** — c'est la précaution la
+plus importante à écrire ici, parce qu'elle est la plus facile à dissimuler.
+Les 29 questions ajoutées l'ont été parce qu'un défaut avait été constaté : le
+système répondait à des questions étrangères. Elles n'ont pas pour autant été
+écrites en regardant les scores une par une. Ce qui a été fait, dans cet ordre :
+les cinq familles ont été définies d'après les **façons d'être hors corpus**, pas
+d'après ce qui faisait échouer le système ; chaque question a été écrite, son
+absence du corpus vérifiée par recherche, puis inscrite ; la coupe a été posée
+par une règle mécanique ; et seulement ensuite le banc a été exécuté. Aucune
+question n'a été retirée, reformulée ni déplacée d'un volet à l'autre après
+l'exécution. C'est une assertion sur une méthode, donc moins forte qu'une
+vérification — elle vaut ce que vaut l'ordre des modifications dans l'historique
+du dépôt, et c'est là qu'il faut aller la contrôler.
 
 Cela réduit le biais ; cela ne le supprime pas, parce que j'ai écrit les
-questions en sachant quel genre de système allait les recevoir.
+questions en sachant quel genre de système allait les recevoir — et, pour les
+29 dernières, en sachant quel genre de défaut elles allaient révéler.
 
 **La vérité de référence est une lecture, pas un avis juridique.** Les articles
 attendus sont ceux qu'un lecteur attentif du texte de 2011 désigne. Ils n'ont
@@ -401,10 +620,24 @@ Le jeu dit donc quelque chose de la relation individuelle de travail, et
 ni de l'arbitrage. Un rappel de 80 % sur ce jeu ne promet rien sur une question
 de conflit collectif.
 
-**Les effectifs par catégorie sont petits.** Avec 7 questions sans réponse, une
-seule question qui change de camp déplace le taux d'abstention de **14,3
-points**. Avec 3 questions `hors_code`, de 33,3 points. Ces lignes du tableau
-indiquent une direction, pas une valeur.
+**Les effectifs par catégorie restent petits, et l'élargissement n'y change
+qu'une chose.** Avec 36 questions sans réponse, une seule question qui change de
+camp déplace le taux d'abstention de **2,8 points** — contre 14,3 points quand
+elles étaient sept. C'est le gain réel, et il ne va pas plus loin : sur la
+moitié de vérification (18 questions) une question vaut **5,6 points**, et par
+famille, où il reste 3 ou 4 questions de chaque côté de la coupe, une question
+vaut entre 25 et 33 points. **Les lignes par famille indiquent une direction,
+pas une valeur**, et le dire est la condition pour les publier. Les 3 questions
+`hors_code` sont restées 3 : une question y vaut toujours 33,3 points, et cette
+catégorie n'a pas été élargie — elle n'était pas en cause.
+
+**Un taux d'abstention global reste une moyenne de cinq choses différentes.**
+36 questions valent mieux que 7, mais un chiffre unique calculé dessus ne décrit
+toujours aucune situation réelle : il dépend de la proportion de questions
+faciles qu'on a mises dans l'ensemble, et cette proportion est mon choix. C'est
+pour cela que le banc imprime les cinq familles, et que la bonne façon de citer
+une abstention est de nommer la famille ou la moitié sur laquelle elle est
+calculée.
 
 **Il ne mesure que la récupération.** Rien ici ne dit que la réponse rédigée
 sera fidèle aux articles retrouvés, que les citations affichées correspondront
@@ -445,13 +678,20 @@ Par ordre décroissant de ce que chaque mesure ajouterait :
    que de formulations inventées, et garder la formulation d'origine, fautes
    comprises.
 3. **Réserver une part du jeu**, jamais montrée à qui règle la récupération.
-   Sans cela, chaque réglage fait monter le chiffre sans faire monter la
-   qualité.
-4. **Monter à 200 questions au moins**, pour que les lignes par catégorie
-   cessent d'être indicatives, et élargir aux livres III à VI, aujourd'hui à
-   quatre articles cités sur 190.
+   **Fait, mais seulement du côté hors corpus** (§ 1.3) : les 36 questions sans
+   réponse sont coupées en 18 / 18. Les **57 questions répondables ne le sont
+   pas** — tout ce qui se règle sur le rappel se règle encore sur les mêmes
+   questions qui le valident. C'est le prochain chantier de cette page, et il
+   demande de monter l'effectif avant de couper : couper 57 questions en deux
+   rendrait chaque moitié trop petite pour que le rappel par catégorie veuille
+   dire quelque chose.
+4. **Monter à 200 questions au moins du côté répondable**, pour que les lignes
+   par catégorie cessent d'être indicatives, et élargir aux livres III à VI,
+   aujourd'hui à quatre articles cités sur 190. L'élargissement du 5 octobre
+   2026 n'a porté que sur l'ensemble hors corpus : le côté répondable est resté
+   à 57 questions, et ses limites sont inchangées.
 5. **Mesurer la génération dans un banc séparé** : fidélité aux articles cités,
-   exactitude des citations, refus sur les 7 questions sans réponse, résistance
+   exactitude des citations, refus sur les 36 questions sans réponse, résistance
    aux 5 injections. Avec un modèle, donc avec une clé, donc avec une
    reproductibilité moindre — et dit comme tel.
 6. **Poser un seuil** dans l'intégration continue dès qu'une vraie récupération

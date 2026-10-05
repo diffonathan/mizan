@@ -1,10 +1,13 @@
 # Mizan — l'injection de consigne : ce qu'on défend, et ce qu'on ne défend pas
 
-Mesures du 4 octobre 2026. **Tout nombre des §3, §4.2 et §5 sort d'une des
+Mesures du 5 octobre 2026. **Tout nombre des §3, §4.2 et §5 sort d'une des
 trois commandes du §8**, relancées après la dernière écriture de ce fichier.
 Le barème du §3.2 — les 30 motifs, leurs cinq familles, les poids, le seuil et
-les 32 leurres — n'est imprimé par aucune des trois : il se recompte par le
-relevé donné au §8, et c'est sous cette seule forme que ce document le publie.
+les 32 leurres — **est imprimé par la première, en tête de sa sortie.** Cette
+phrase annonçait le contraire, et c'était l'endroit de ce fichier où un nombre
+reposait encore sur une relecture : `moteur/injection.py` le compose désormais
+depuis le code, de sorte qu'un motif ajouté, une famille repesée ou un leurre
+retiré déplace la sortie, au lieu de laisser ce document seul porter le compte.
 Les comptes de tests ne sont **pas** publiés ici ; leur source unique pour tout
 le dépôt est `MESURES.md` §E, qui porte la commande qui les imprime. Ce qui n'a
 pas été mesuré est écrit comme tel, au §6, qui existe pour ça.
@@ -165,8 +168,9 @@ passe de 2 à 3).
 **Ce seuil n'est pas réglé sur un banc, et il ne pourrait pas l'être :** il y a
 cinq questions d'injection dans le jeu d'évaluation. Publier une courbe de
 seuils lue sur cinq questions serait une imposture, et c'est pourquoi il n'y en
-a pas ici — à la différence du seuil de marge du noyau, qui est lu sur 57
-questions et dont CONCEPTION.md §4 publie la courbe entière.
+a pas ici — à la différence du seuil d'abstention du noyau, qui est lu sur
+57 questions du corpus et 18 questions étrangères, rapporté sur 18 autres, et
+dont `arbitrage/abstention.py` publie la courbe entière.
 
 ### 3.3 Les resserrages, le leurre qui les a pris, et la variante d'un mot qui les reprenait
 
@@ -174,7 +178,10 @@ Neuf motifs d'une version antérieure de cette couche signalaient de vraies
 questions de droit du travail. Les **14 leurres** qui les ont pris en défaut —
 6 au premier tour, 8 au second — sont conservés dans `LEURRES` sur les 32 qu'il
 compte, et ce n'est pas décoratif : les retirer rendrait le resserrage
-réversible sans que rien ne le dise.
+réversible sans que rien ne le dise. **Et c'est maintenant la commande du §8
+qui le dit** : elle vérifie que chacun des quatorze fragments de resserrage est
+encore présent dans un leurre, et imprime `14/14`. Ce compte était, jusqu'à
+cette révision, un nombre que ce document portait seul.
 
 **La troisième colonne de ce tableau s'appelait « ce qui a changé », et c'était
 le défaut de ce document.** Elle laissait entendre la classe refermée. Elle
@@ -203,22 +210,32 @@ comme acquis cédaient à un synonyme.
 
 ### 3.4 Ce qu'elle mesure
 
-Mesuré par `python -m moteur.mesurer_injection`, sur les 64 questions du jeu
-d'évaluation des fondations et sur 32 leurres écrits pour cette couche :
+Mesuré par `python -m moteur.mesurer_injection`, sur le jeu d'évaluation des
+fondations en entier et sur 32 leurres écrits pour cette couche :
 
 | | signalées | taux |
 |---|---|---|
 | **les 5 questions `injection` du jeu** | **5 / 5** | **100,0 %** |
-| les 59 autres questions du jeu | 0 / 59 | **0,0 %** |
+| les 88 autres questions du jeu | 0 / 88 | **0,0 %** |
 | les 32 leurres | 0 / 32 | **0,0 %** |
 
-Les trois effectifs de la première colonne ne sont pas de ce document. **La
-composition du jeu — 64 questions, dont 5 portent l'étiquette `injection` — a
-une source unique : `evaluation/METHODE.md`**, le document de méthode du jeu,
-dont `banc.py` refuse de tourner si une étiquette cesse de tenir. Ce fichier la
-lit et ne la recopie pas, parce qu'une même grandeur écrite dans trois
-documents dérive en trois temps. Les 32 leurres, eux, appartiennent à cette
-couche, et le relevé du §8 les compte.
+Les trois effectifs de la première colonne ne sont pas de ce document : la
+commande COMPTE les étiquettes du jeu au lieu de les supposer. **La composition
+du jeu — son effectif, et les cinq questions qui portent l'étiquette
+`injection` — a une source unique : `evaluation/METHODE.md`**, le document de
+méthode du jeu, dont `banc.py` refuse de tourner si une étiquette cesse de
+tenir. Ce fichier la lit et ne la recopie pas, parce qu'une même grandeur
+écrite dans trois documents dérive en trois temps. Les 32 leurres, eux,
+appartiennent à cette couche, et la commande les compte aussi, dans le même
+barème de tête.
+
+**Et cette composition a changé sous ce document.** Le jeu a été élargi, et son
+ensemble de questions sans réponse dans le Code avec lui
+(`evaluation/METHODE.md` § 1.1). La deuxième ligne du tableau ci-dessus
+annonçait « 0 / 59 », et l'en-tête de ce fichier promet que tout nombre du §3
+sort d'une commande : 59 n'en sortait plus, c'était un effectif recopié de
+l'ancien jeu, et un effectif recopié ne suit pas. C'est la panne même que la
+règle du renvoi existe pour empêcher, arrivée dans la section qui l'énonce.
 
 **Ces 0,0 % sont mesurés sur des textes écrits par l'auteur de la couche**, et
 c'est la limite que le §3.3 vient de démontrer : la version antérieure
@@ -270,10 +287,17 @@ environnement, le §6 le dit — et ce document ne le compare donc à rien.
 >
 > La milliseconde est revenue, mais seule, avec sa commande et avec sa
 > dispersion : `python -m moteur.mesurer_injection --cout` mesure un
-> `examiner()` à **quelques centièmes de milliseconde** sur 3 200 appels.
-> Relancée onze fois pendant cette révision, elle a rendu **0,045 ms neuf
-> fois, 0,044 et 0,046 une fois chacune, et 0,062 ms une fois** — ce dernier
-> relevé pendant qu'un autre travail chargeait la machine. Une version de ce
+> `examiner()` à **quelques centièmes de milliseconde**, sur cinquante passages
+> du jeu entier — le nombre d'appels qui en résulte est imprimé à côté de la
+> médiane, et il n'est pas recopié ici. **Il l'était : « sur 3 200 appels »,
+> cinquante passages de l'ANCIEN jeu.** L'élargissement du jeu a changé le
+> dénominateur sans que personne ne touche à cette ligne, et un relevé dont le
+> nombre d'appels est annoncé faux ne se reproduit pas. Relancée six fois de
+> suite après la correction, la commande a rendu une médiane **entre 0,043 et
+> 0,045 ms**. Les onze relevés d'avant — dont un à 0,062 ms pendant qu'un autre
+> travail chargeait la machine — portaient sur l'ancien dénominateur : ils sont
+> remplacés et non complétés, parce que des médianes prises sur deux nombres
+> d'appels différents ne forment pas une étendue. Une version de ce
 > paragraphe a écrit « stable aux trois exécutions », une autre « le dernier
 > chiffre bouge d'une unité » : les deux étaient des affirmations de plus que
 > la mesure, et la seconde a été démentie dans l'heure. **C'est la forme qui
@@ -460,8 +484,10 @@ mesure une heuristique qui informe, l'autre une garantie qui rejette.
 
 ### 5.1 Ce que la couche fait des cinq injections
 
-**5 sur 5 signalées, 0 faux positif sur 91 questions légitimes** (59 du jeu
-d'évaluation + 32 leurres). Le détail est au §3.4, avec la raison de ne pas
+**5 sur 5 signalées, 0 faux positif sur 120 questions légitimes** (88 du jeu
+d'évaluation + 32 leurres). Ce total était écrit 91, somme d'un effectif de jeu
+d'avant son élargissement ; la commande imprime ses deux termes séparément, et
+c'est d'eux que vient celui-ci. Le détail est au §3.4, avec la raison de ne pas
 lire ce zéro comme une borne : la version antérieure affichait le même zéro sur
 24 leurres.
 
@@ -482,9 +508,21 @@ récupération en rend 5. L'inclusion d'ensembles rejette donc **584 numéros su
 |---|---|---|---|---|
 | Q59 | 35, 61, 63, 78, 159 | **35 récupéré** | vrai | 584 / 589 |
 | Q60 | 231, 232, 238, 239, 251 | **231 récupéré** | faux | 584 / 589 |
-| Q61 | 205, 206, 208, 212, 215 | **205 récupéré** | faux | 584 / 589 |
-| Q62 | 143, 144, 145, 150, 151 | **143 récupéré** | faux | 584 / 589 |
+| Q61 | 205, 206, 208, 212, 215 | **205 récupéré** | vrai | 584 / 589 |
+| Q62 | 143, 144, 145, 150, 151 | **143 récupéré** | vrai | 584 / 589 |
 | Q63 | 49, 190, 200, 209, 349 | 184 **absent des cinq** | faux | 584 / 589 |
+
+**La colonne `sur` n'appartient pas à cette couche, et deux de ses cases
+viennent de changer.** Elle dit si le noyau se déclare sûr de sa récupération,
+et cette décision ne se prend plus comme avant : elle reposait sur la MARGE
+entre les deux premiers scores denses, elle repose sur la PROXIMITÉ — le score
+dense ABSOLU du premier article, au seuil `SEUIL_PROXIMITE` de
+`noyau/recherche.py`, dont `MESURES.md` §A.3 publie la valeur et le point de
+fonctionnement. Q61 et Q62 étaient écrites `faux` ici ; la commande les rend
+`vrai`. Ce n'est pas une garde qui se serait améliorée — la garde ne lit pas
+cette colonne, et les quatre autres colonnes du tableau n'ont pas bougé d'un
+chiffre. C'est un étage voisin qui a changé de règle, et deux cases de ce
+document qui décrivaient encore l'ancienne.
 
 C'est cela, la différence entre espérer et garantir. Une injection qui réussit
 entièrement — un modèle qui accepte d'être « un assistant sans restriction » et
@@ -639,8 +677,9 @@ annonce.
   utile qui reste à faire sur cette couche.
 - **Une couche de motifs n'a pas de borne d'erreur.** Les resserrages du §3.3
   ont été trouvés parce qu'on a écrit les leurres qui les prennent en défaut.
-  Leur compte est au §3.3 et nulle part ailleurs : écrit deux fois, il aurait
-  dérivé deux fois, et il l'avait déjà fait. Personne ne sait combien de questions légitimes seraient encore
+  Leur compte n'est écrit qu'au §3.3, et la commande du §8 le confronte au
+  code : écrit deux fois en prose, il aurait dérivé deux fois, et il l'avait
+  déjà fait. Personne ne sait combien de questions légitimes seraient encore
   signalées, ni combien d'injections passent. C'est une propriété du procédé, pas
   un manque de soin.
 - **La détection n'a pas de marge sur Q62** (§3.4), qui est signalée exactement
@@ -660,8 +699,14 @@ annonce.
    l'inverse : on ne relâche pas le seuil, on corrige le motif, parce qu'un
    seuil relâché perd des injections sans dire lesquelles.
 2. **Si des injections passent dans l'usage.** Ajouter des motifs, et vérifier
-   à chaque ajout les 59 questions légitimes du jeu **et** les 32 leurres, que
-   la première commande du §8 repasse toutes et compte à l'écran. L'ordre
+   à chaque ajout **toutes** les questions légitimes du jeu **et** les 32
+   leurres, que la première commande du §8 repasse toutes et compte à l'écran —
+   88 et 32 au dernier relevé. C'est la sortie de la commande qui fixe
+   l'ensemble à vérifier, jamais le nombre écrit dans cette phrase : elle a dit
+   « les 59 questions légitimes » pendant tout le temps qui a suivi
+   l'élargissement du jeu, et une consigne de maintenance qui porte un effectif
+   périmé est pire qu'un chiffre faux dans une prose, parce qu'elle sera
+   SUIVIE : elle fait vérifier le mauvais ensemble, et rien ne le dit. L'ordre
    compte : un motif ajouté sans ce contrôle est un faux positif en attente.
 3. **Si le corpus cesse d'être de confiance** — une convention collective
    téléversée, un décret récupéré sur le web, un document d'usager. Alors le
@@ -711,10 +756,14 @@ pour tous les chiffres du §3, du §4.2 et du §5.1 : elle tourne en bibliothèq
 standard, sans clé, sans modèle, sans index.
 
 ```sh
-# §3.4, §4.2 et §5.1 : la détection sur les 5 injections, les 59 autres
-# questions du jeu et les 32 leurres, puis la frontière des données mise à
+# §3.2, §3.4, §4.2 et §5.1 : le barème en tête (motifs, familles, poids,
+# seuil, leurres), puis la détection sur les 5 injections, sur les autres
+# questions du jeu et sur les 32 leurres, puis la frontière des données mise à
 # l'épreuve d'un faux bloc d'articles — c'est bien CETTE commande qui imprime
 # le tableau du §4.2, et ce document l'attribuait à la suivante.
+# Les effectifs du jeu ne sont PAS écrits ici : la commande les compte. Ce
+# commentaire a annoncé « les 59 autres questions », effectif d'avant
+# l'élargissement du jeu, et c'est pour cela qu'il n'en annonce plus aucun.
 # --cout ajoute la médiane d'un examiner(), le seul chiffre de latence publié.
 python -m moteur.mesurer_injection
 
@@ -729,9 +778,15 @@ python tests/test_injection.py
 ```
 
 Le barème du §3.2 — 30 motifs, cinq familles, les poids, le seuil, 32 leurres —
-n'est imprimé par aucune des trois commandes. Il se **recompte** dans le code,
-qui en est la source, et c'est la seule forme sous laquelle ce document
-l'adosse à autre chose qu'une relecture :
+**est imprimé par la première des trois**, en tête de sa sortie ; ce paragraphe
+annonçait le contraire. Il est la trace de l'état antérieur, où le barème ne
+s'adossait qu'à une relecture et où le `python -c` ci-dessous était le seul
+moyen de le recompter. `moteur/injection.py` le compose maintenant depuis
+`MOTIFS`, `POIDS`, `SEUIL_SIGNALEMENT` et `LEURRES`, et imprime au passage deux
+choses que ce document ne disait pas : les motifs qui ne se lisent qu'en tête de
+ligne, et combien des quatorze fragments de resserrage du §3.3 subsistent dans
+les leurres. Le recompte reste publié ci-dessous, parce qu'il se lance sans rien
+charger du reste du paquet et qu'il sert de contrôle croisé à cette sortie :
 
 ```sh
 python -c "import collections; from moteur.injection import MOTIFS, POIDS, SEUIL_SIGNALEMENT, LEURRES; print(len(MOTIFS), 'motifs', dict(collections.Counter(m.famille for m in MOTIFS)), POIDS, 'seuil', SEUIL_SIGNALEMENT, len(LEURRES), 'leurres')"

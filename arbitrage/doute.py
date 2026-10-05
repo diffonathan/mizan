@@ -8,7 +8,9 @@ juridique se juge sur deux nombres indissociables : la part des questions où
 il accepte de répondre, et la part de ces réponses qui sont justes. Une
 approche qui répond à tout avec 61 % de bon article au rang 1 et une
 approche qui répond à la moitié avec 90 % de bon article ne se comparent pas
-sur le rappel.
+sur le rappel. (Ces deux-là sont une illustration de la forme du problème, pas
+une mesure : les seuls chiffres qui engagent ce fichier sont ceux qu'il
+imprime.)
 
 Les trois signaux balayés ici ont tous été proposés par un candidat, aucun
 n'est inventé par l'arbitre :
@@ -21,9 +23,17 @@ n'est inventé par l'arbitre :
 
 Aucun seuil n'est retenu à la fin de ce fichier. Il imprime des courbes
 entières, pour une raison qui est le cœur du dossier : choisir un seuil sur
-les 64 questions du banc indépendant referait, à l'étage de l'arbitrage,
+les questions du banc indépendant referait, à l'étage de l'arbitrage,
 exactement la faute que les trois candidats ont confessée à l'étage du
 prototype.
+
+AUCUN EFFECTIF N'EST ÉCRIT DANS CE FICHIER, ni dans cette prose ni dans les
+légendes qu'il imprime. Il en portait trois — « 64 questions », « 57 questions
+répondables », « / 7 » — et les trois sont devenus faux le jour où le jeu hors
+corpus est passé de 7 à 36 questions, sans que rien ne le signale. Une sortie
+de mesure qui annonce le mauvais effectif ne se contente pas d'être fausse :
+c'est contre elle qu'on vérifie les documents, et elle y confirme alors
+l'erreur. Les effectifs sont donc comptés sur le jeu à chaque exécution.
 """
 from __future__ import annotations
 
@@ -135,6 +145,8 @@ def _pc(v):
 
 
 def table(titre, lignes, classement, regles):
+    repondables = sum(1 for l in lignes if l["attendus"])
+    sans = len(lignes) - repondables
     print()
     print(f"  {titre}")
     print("  " + "-" * 96)
@@ -143,11 +155,15 @@ def table(titre, lignes, classement, regles):
     print("  " + "-" * 96)
     for nom, regle in regles:
         m = evaluer(lignes, classement, regle)
+        # « 4 / 36 » et non « 4 » : une proportion dit toujours sur combien de
+        # cas elle porte, à l'endroit où elle est écrite.
+        refus = f"{m['refuses_hors_corpus']} / {sans}"
         print(f"  {nom:34} {_pc(m['service']):>8} {_pc(m['exactitude1']):>7} "
               f"{_pc(m['exactitude3']):>7} {m['utiles1']:>7} {m['utiles3']:>7} "
-              f"{m['refuses_hors_corpus']:>14} / 7")
+              f"{refus:>20}")
     print("  " + "-" * 96)
-    print("  service   : part des 57 questions répondables où le système accepte de répondre")
+    print(f"  service   : part des {repondables} questions répondables où le système")
+    print("              accepte de répondre")
     print("  just@1/@3 : parmi CES réponses, part dont un article attendu est au rang 1 / dans les 3")
     print("  bons@1/@3 : nombre absolu de questions correctement servies (le vrai produit rendu)")
 
@@ -193,8 +209,9 @@ def principal() -> int:
            ("accord ≥ 1 OU marge dense ≥ 0,05",
             lambda l: l["accord"] >= 1 or l["marge_dense"] >= 0.05)])
 
+    hors = [l for l in lignes if not l["attendus"]]
     print()
-    print("  LES 7 QUESTIONS SANS RÉPONSE, question par question")
+    print(f"  LES {len(hors)} QUESTIONS SANS RÉPONSE, question par question")
     print("  " + "-" * 96)
     for l in lignes:
         if l["attendus"]:

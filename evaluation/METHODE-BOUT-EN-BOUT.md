@@ -9,13 +9,25 @@ Ce document dit ce que `banc_bout_en_bout.py` mesure, ce qu'il ne mesure pas, et
 pourquoi un chiffre obtenu avec un faux modèle n'est pas un chiffre de
 production.
 
-**Tout nombre de mesure écrit ici sort d'une commande du §7, lancée dans la
-session qui a écrit ce fichier.** Trois nombres viennent d'ailleurs et sont
-nommés avec leur source : la reprise de `CONCEPTION.md` §4 au §5, et la
-couverture du jeu (57 articles sur 589) et la date de consolidation au §8, qui
-viennent de `METHODE.md` et du corpus. Le compte de tests, lui, n'est plus
-publié ici en valeur : il se périme à chaque test ajouté, et sa source unique
-est `MESURES.md` §E, qui nomme sa commande à côté du total.
+**Ce document ne publie plus aucune valeur de mesure.** Les valeurs du banc de
+bout en bout vivent dans `MESURES.md` §D, qui nomme la commande à côté de
+chacune ; la composition du jeu vit dans `evaluation/METHODE.md` ; le compte de
+tests dans `MESURES.md` §E. Ne restent ici que quatre sortes de nombres, et
+aucune n'est une série qui dérive : les nombres de **structure** — les quatre
+familles de modèle factice, les six attributs du contrat, les écritures de
+citation reconnues —, qui ne se périment qu'avec le code ; les deux **bornes**
+des témoins du §5, 0 % et 100 % de rejet, qui sont le contrat de ces témoins
+avant d'être une mesure ; les **zéros** des invariants, qui ne valent pas comme
+valeur mais comme condition de sortie en 0 ; et les deux **durées** du §7, qui
+nomment leur machine et ne mesurent pas le produit.
+
+C'est une réparation, et sa cause est écrite au §6 : les séries du banc avaient
+été recopiées ici à côté de leur source, et une copie ne suit pas son original.
+Ce document a continué d'expliquer le verdict du noyau par la **marge** entre
+deux candidats — un signal que le noyau ne consulte plus — et de définir
+l'abstention correcte sur **sept** questions hors corpus, là où le jeu en compte
+désormais cinq familles. Un chiffre périmé se corrige ; une définition périmée
+invalide la grandeur qu'elle définit.
 
 ---
 
@@ -86,8 +98,19 @@ ses sources.
 
 | mesure | sur | réussir, c'est |
 |---|---|---|
-| abstention correcte | les 7 questions sans réponse dans le Code | se taire |
-| dérobade | les 57 questions répondables | ne pas se taire |
+| abstention correcte | les questions étiquetées `sans_reponse` — celles dont le Code ne traite pas le sujet | se taire |
+| dérobade | les questions répondables — celles dont la vérité de référence n'est pas vide | ne pas se taire |
+
+**Les deux effectifs sont ceux du jeu, et ce document ne les recopie pas** :
+leur source est `evaluation/METHODE.md` §1, et le banc les imprime en tête de sa
+sortie puis à côté de chaque taux. Cette ligne-ci est une réparation, et la plus
+grave du lot : la colonne « sur » disait **« les 7 questions sans réponse dans le
+Code »** longtemps après que l'ensemble hors corpus soit passé à cinq familles.
+Ce n'était pas une illustration périmée, c'était la **définition** de la
+grandeur : un lecteur qui rapporte à 7 ce que le banc a calculé sur l'ensemble
+entier obtient un taux qui ne décrit rien, et rien dans la page ne l'en
+avertissait. Une définition fausse invalide la mesure qu'elle définit, pas
+seulement son exemple.
 
 Les deux ne se lisent **jamais** l'une sans l'autre : un système qui se tait
 toujours obtient 100 % d'abstention correcte et 100 % de dérobade. Le témoin
@@ -96,10 +119,23 @@ toujours obtient 100 % d'abstention correcte et 100 % de dérobade. Le témoin
 Le banc décompose en outre les silences par leur **cause**, parce que les deux ne
 se corrigent pas de la même façon :
 
-- **silence décidé par la récupération** — la marge est sous le seuil, le
-  répondeur n'a même pas fait rédiger. Se corrige en déplaçant le seuil.
+- **silence décidé par la récupération** — la **proximité** du premier article
+  est sous le seuil (`SEUIL_PROXIMITE` de `noyau/recherche.py`), le répondeur
+  n'a même pas fait rédiger. Se corrige en déplaçant le seuil.
 - **silence décidé par la garde** — une rédaction a été produite puis refusée.
   Se corrige du côté du modèle ou de l'invite, pas du seuil.
+
+La première puce disait « **la marge** est sous le seuil », c'est-à-dire l'écart
+entre le premier et le deuxième score dense. **Ce n'est plus le signal qui
+décide**, et la phrase n'expliquait donc plus aucun verdict : elle rendait compte
+d'une décision par une grandeur que le noyau ne consulte pas. Le signal est la
+proximité — le score dense **absolu** du premier article —, et déplacer le seuil
+ne déplace pas le même objet : un seuil de marge arbitre entre deux rangs, un
+seuil de proximité arbitre entre un article et la question. La marge, elle,
+n'était pas « inversée » : son aire sous la courbe est au-dessus de 0,5, elle
+porte de l'information et dans le bon sens. Son défaut est qu'elle **sépare
+mal** là où la proximité sépare presque, et les deux aires qui le disent, avec
+la commande qui les imprime, sont au §4 de `CONCEPTION.md`.
 
 ---
 
@@ -278,21 +314,38 @@ Ils sont au banc de bout en bout ce que `mots`, `idf` et `muet` sont à
 | `--redacteur menteur` | invention systématique | **100 %** de rejet |
 | `--redacteur mixte` | les quatre familles | entre les deux |
 
-Mesuré au §6 : `fidele` → 0,0 % de rejet, `menteur` → 100,0 % de rejet. Si le
+Mesuré par les commandes du §7, et publié aux colonnes `fidele` et `menteur` de
+`MESURES.md` §D.1 : `fidele` → 0,0 % de rejet, `menteur` → 100,0 % de rejet. Ces
+deux-là sont des bornes et non une série : les déplacer serait une régression de
+la garde, pas une dérive du jeu. Si le
 premier rejetait quoi que ce soit, la garde serait trop zélée ; si le second
 laissait passer quoi que ce soit, elle serait une prière. Les deux bornes
 vérifient le banc **avant** qu'on lise le chiffre du milieu.
 
 Le témoin `fidele` sur la récupération réelle a une seconde vertu : comme il cite
 toujours l'article de rang 1, son « au moins une citation attendue » **est** la
-justesse au rang 1 des questions servies. Mesuré ici (modèle factice `fidele`,
-récupération réelle, et c'est en réalité une mesure de la RÉCUPÉRATION au
-rang 1) : **32 des 36 réponses rendues**, soit 88,9 %. *(Pour comparaison, et
-c'est un nombre repris de `CONCEPTION.md` §4 et non remesuré ici : l'arbitrage
-des fondations annonce
-32 bonnes premières réponses au seuil de marge 0,04. Les deux chemins se
-rejoignent, ce qui est le contrôle de cohérence le moins coûteux que ce banc
-puisse offrir sur son branchement au noyau.)*
+justesse au rang 1 des questions servies — modèle factice `fidele` sur la
+récupération réelle, donc en réalité une mesure de la RÉCUPÉRATION, lue par le
+chemin de la rédaction. La valeur est celle de la ligne « au moins une citation
+attendue » de la colonne `fidele` de `MESURES.md` §D.1, qui porte à côté d'elle
+le nombre de réponses rendues sur lequel elle est calculée ; elle n'est pas
+recopiée ici.
+
+C'est aussi le contrôle de cohérence le moins coûteux que ce banc puisse offrir
+sur son branchement au noyau, et il se vérifie en ouvrant deux pages : le nombre
+de **bonnes premières réponses** que `CONCEPTION.md` §4 annonce « si l'on répond
+à tout » est celui que ce banc retrouve en ne servant que les questions
+au-dessus du seuil — parce que les deux seules questions que le seuil retient
+étaient déjà fausses au rang 1. Deux mesures indépendantes désignent donc le
+même nombre, et c'est la relation, non la valeur, qui est le contrôle.
+
+Ce paragraphe annonçait « 32 des 36 réponses rendues » et créditait l'accord à
+« l'arbitrage des fondations au seuil de marge 0,04, **qui était alors en
+place** ». Les deux moitiés sont fausses au présent : ce seuil n'est plus en
+place, et 36 était le nombre de réponses que l'ancien signal laissait passer.
+L'accord des deux chemins, lui, tient encore ; il s'est déplacé avec le signal,
+et c'est pour qu'il cesse de se périmer qu'il est maintenant écrit comme une
+relation.
 
 ### Le répondeur par défaut est le produit ; le témoin reste une borne
 
@@ -317,20 +370,24 @@ L'étage de réponse du produit existe (`moteur/`), et le banc a été branché
 dessus : `--repondeur moteur.repondre:Mizan`. **Sur les trois modèles factices,
 les deux rapports se superposent ligne pour ligne** — mêmes rédactions
 observées, mêmes hallucinations, mêmes rejets, mêmes abstentions, zéro fuite des
-deux côtés — en récupération réelle par la comparaison des JSON ci-dessous, et en
+deux côtés — en récupération réelle par la comparaison des rapports JSON, et en
 récupération factice par `test_les_deux_gardes_rejettent_la_meme_chose`, qui
-rejoue le contrôle sur les trois modèles. Comparaison des JSON en mode `reel` :
+rejoue le contrôle sur les trois modèles. Les commandes de comparaison sont au
+§7 ; leur résultat est publié par `MESURES.md` §D.4, et les valeurs des trois
+colonnes par `MESURES.md` §D.1.
 
-| | témoin du banc | `moteur.repondre:Mizan` |
-|---|---|---|
-| `mixte` | 37 rédactions, 17 hallucinations, 62,2 % de rejet | **identique** |
-| `fidele` | 37 rédactions, 0 hallucination, 0,0 % de rejet | **identique** |
-| `menteur` | 37 rédactions, 37 hallucinations, 100,0 % de rejet | **identique** |
+Ce tableau portait ici les trois colonnes en clair — « 37 rédactions » sur
+chacune des trois lignes. **C'était une seconde source pour une série qui en
+avait déjà une**, et elle a dérivé exactement comme dérive une seconde source :
+ces trois 37 étaient le compte d'un jeu qui a depuis été élargi, sous un signal
+d'abstention qui a depuis été remplacé, et rien ici ne le signalait. Le fait que
+ce tableau voulait établir n'était d'ailleurs pas la valeur, c'était l'**égalité**
+des deux colonnes — et une égalité s'écrit sans aucun nombre.
 
 Ce n'est pas une redondance, c'est la seule mesure du dossier qui ne repose sur
 la parole de personne : **deux gardes écrites séparément, deux lecteurs de
-citations écrits séparément, et le même verdict sur les 37 rédactions**. Si l'un
-des deux avait un trou, le compteur de fuites ou celui des rejets à tort le
+citations écrits séparément, et le même verdict sur les mêmes rédactions**. Si
+l'un des deux avait un trou, le compteur de fuites ou celui des rejets à tort le
 dirait. Le contrôle est rejoué par les tests, et il se **saute** proprement si
 `moteur/` n'est pas là — le banc doit rester mesurable seul.
 
@@ -338,19 +395,21 @@ dirait. Le contrôle est rejoué par les tests, et il se **saute** proprement si
 
 ## 6. Ce qui a été mesuré
 
-Sept exécutions dont les rapports JSON ont été comparés, dans la session qui a
-écrit ce fichier : les quatre ci-dessous avec le répondeur par défaut, qui est le
-produit (`moteur.repondre:Mizan`), et les trois du contrôle croisé du §5,
-lancées avec `--repondeur temoin`, qui leur sont identiques. Les deux étages
-sont nommés sur chaque ligne, et aucune de ces lignes n'est une mesure de
-production.
+Sept exécutions dont les rapports JSON ont été comparés, et dont les commandes
+sont toutes au §7 : quatre avec le répondeur par défaut, qui est le produit
+(`moteur.repondre:Mizan`), et les trois du contrôle croisé du §5, lancées avec
+`--repondeur temoin`, qui leur sont identiques. Les deux étages sont nommés sur
+chaque ligne, et aucune de ces lignes n'est une mesure de production. C'est sur
+ces sept-là que se lisent les zéros d'invariant cités plus bas ; les valeurs,
+elles, se relisent à chaque rejeu dans `MESURES.md` §D.
 
-**Récupération réelle** (noyau, index dense `google/embeddinggemma-300m`, seuil de
-marge 0,04, k = 5), **modèle factice** :
+**Récupération réelle** (noyau, index dense `google/embeddinggemma-300m`, seuil
+de **proximité** `SEUIL_PROXIMITE` de `noyau/recherche.py`, k = 5), **modèle
+factice** :
 
-> **Les valeurs de ce tableau vivent dans `MESURES.md` §D.1, et nulle part
-> ailleurs.** Ce document-ci est celui de la MÉTHODE : il dit ce que chaque
-> ligne mesure et pourquoi elle existe. Les recopier ici en ferait une seconde
+> **Les valeurs des trois colonnes `fidele`, `mixte` et `menteur` vivent dans
+> `MESURES.md` §D.1, et nulle part ailleurs.** Ce document-ci est celui de la
+> MÉTHODE : il dit ce que chaque ligne mesure et pourquoi elle existe. Les recopier ici en ferait une seconde
 > source, qui dériverait de la première au premier rejeu sans que rien ne le
 > signale — c'est précisément ce qui est arrivé à ce dossier, et le renvoi est
 > la seule réparation qui tienne.
@@ -379,44 +438,73 @@ Ce que les lignes mesurent, et ce qu'il faut lire ensemble :
   construction* ne vérifie rien. Les trois ont été rendus atteignables dans
   cette session, et le §7 dit par quelles commandes.
 
-**Récupération factice** (plancher `idf`, ni modèle ni index), modèle `mixte` :
-9 réponses rendues, 22,2 % d'au moins une citation attendue, 33 rédactions dont
-17 hallucinantes (51,5 %), 69,7 % de rejet, 85,7 % d'abstention correcte,
-84,2 % de dérobade, 0 fuite, 17 hallucinations fabriquées et 17 mesurées. Cette
+**Récupération factice** (plancher `idf`, ni modèle ni index), modèle `mixte`.
+Les valeurs de cette ligne sont publiées par `MESURES.md` §D.2 et ne sont pas
+recopiées ici : elles ont changé avec le signal d'abstention, et deux copies
+d'un même nombre finissent toujours par diverger. Cette
 ligne ne dit rien de la qualité du produit — le plancher `idf` n'est pas le bras
 dense — et elle sert à une seule chose : la chaîne entière tourne et se mesure
 **sans aucun paquet installé, sans index, sans modèle et sans clé**.
+
+> **LE SIGNAL D'ABSTENTION A CHANGÉ, ET C'EST POURQUOI CE DOCUMENT NE PUBLIE
+> PLUS DE VALEUR.** Le noyau ne décide plus sur la marge entre les deux premiers
+> candidats mais sur la proximité au Code (`noyau/recherche.py`,
+> `SEUIL_PROXIMITE`). Les mêmes commandes, relancées, rendent d'autres nombres —
+> et ce sont ceux de `MESURES.md` §D qui font foi, y compris pour dire de combien
+> la dérobade d'un rédacteur loyal a baissé. Le jeu, lui, a été élargi hors
+> corpus le 5 octobre 2026 (`METHODE.md` §1.1) : tout effectif de l'ancienne
+> taille est donc faux, et tout taux calculé dessus avec lui. Ce qui reste vrai
+> ici est la MÉTHODE : ce qui est mesuré, comment, et pourquoi chaque invariant
+> doit pouvoir échouer.
 
 ### Les trois choses que ces chiffres disent, et qui comptent
 
 1. **La garde tient. Zéro fuite sur les sept exécutions**, dont deux où le
    modèle invente à chaque réponse. Ce n'est pas un espoir : c'est une inclusion
-   d'ensembles, et les 37 rejets du témoin `menteur` sont la mesure de cette
-   inclusion. C'est la différence entre espérer et garantir.
+   d'ensembles, et les rejets du témoin `menteur` en sont la mesure : il invente
+   sur chacune de ses rédactions, et la garde en refuse autant qu'il en produit.
+   Les deux nombres sont égaux à la colonne `menteur` de `MESURES.md` §D.1, et
+   c'est leur **égalité** qui est la garantie, pas leur valeur. C'est la
+   différence entre espérer et garantir.
 
-2. **La garde se paie en dérobade, et le prix est lourd.** Sur la même
-   récupération, un modèle loyal donne 36,8 % de dérobade — exactement celle du
-   noyau seul, puisque la garde n'y rejette rien — et le modèle `mixte`
-   la porte à **75,4 %**. Les vingt-trois rédactions que la garde refuse se
-   répartissent en **vingt-deux questions répondables perdues** et **un seul
-   refus souhaitable** (Q55, point 3) : l'échange est à vingt-deux contre un, et
-   il est dans le mauvais sens — **sous un modèle factice qui invente sur
-   45,9 % de ses rédactions. Le rapport est fabriqué par le banc : un vrai
-   modèle inventerait moins, et les deux nombres seraient à remesurer.**
+2. **La garde se paie en dérobade.** Sur la même récupération, un modèle loyal
+   donne la dérobade du noyau seul, puisque la garde n'y rejette rien : c'est la
+   ligne `fidele` de `MESURES.md` §D.1. Le modèle `mixte` la porte bien au-delà.
+   Le constat de méthode tient : la dérobade a DEUX sources, le seuil
+   d'abstention et le modèle, et la seconde ne se corrige pas en déplaçant le
+   premier. Son poids relatif, lui, a changé du tout au tout avec le signal —
+   l'abstention du noyau ne pèse presque plus rien, le modèle pèse l'essentiel —
+   et c'est `MESURES.md` §D.1 qui donne le partage des silences entre les deux
+   causes, avec l'effectif sur lequel il porte. **Le rapport est fabriqué par le
+   banc** : la part d'invention du modèle factice est une décision du factice,
+   un vrai modèle inventerait moins, et les deux nombres seraient à remesurer.
    L'abstention était déjà désignée comme le problème ouvert du projet ; ce banc
-   montre qu'elle a une seconde source, indépendante du seuil de marge, et que
-   cette source est le modèle. **Améliorer la rédaction est donc un levier de
+   montre qu'elle a une seconde source, indépendante du seuil d'abstention, et
+   que cette source est le modèle. **Améliorer la rédaction est donc un levier de
    rappel que le réglage du seuil ne remplace pas** — et non, sur ces chiffres,
    « le plus important qui reste » : ce classement-là demande un vrai modèle.
 
-3. **Les 100 % d'abstention correcte du mode `mixte` sont un coup de chance, et
-   il ne faut pas les lire autrement.** Le noyau seul en refuse six sur sept
-   (85,7 %, ligne `fidele`). La septième est Q55, « Quelles sont les règles du
-   congé sabbatique ? », que la marge laisse passer : elle n'est refusée en mode
-   `mixte` que parce que le condensé de son texte lui a tiré la famille
-   `muette`. Avec un autre tirage, elle serait rendue. Écrire « 100 %
-   d'abstention correcte » sans cette phrase serait précisément le genre de
-   chiffre que ce projet ne peut pas se permettre.
+   Ce point portait ici un échange chiffré — « vingt-trois rédactions refusées,
+   vingt-deux questions répondables perdues contre un seul refus souhaitable,
+   sous un modèle factice qui invente sur 45,9 % de ses rédactions », et une
+   dérobade loyale de 36,8 %. Ces nombres sont ceux du jeu d'avant
+   l'élargissement et de l'ère de la marge ; le partage des silences entre les
+   deux causes n'est plus le même, et la dérobade loyale a changé d'ordre de
+   grandeur. **Le constat de méthode ne dépendait pas de leur valeur** : il tient
+   au fait que la seconde source existe, et elle existe encore. C'est pour que la
+   relecture de ce paragraphe ne dépende plus d'un rejeu qu'il renvoie désormais
+   à `MESURES.md` §D.1 au lieu de recopier la série.
+
+3. **Une abstention correcte plus haute en mode `mixte` qu'en mode `fidele`
+   est un coup de chance, et il ne faut pas la lire autrement.** Le noyau seul
+   en refuse ce que dit la ligne `fidele` de `MESURES.md` §D.1 ; en mode `mixte`
+   le compte monte, mais pas parce que la récupération a mieux jugé — parce que
+   le condensé du texte de certaines de ces questions a tiré la famille `muette`,
+   que la garde rejette. Avec un autre tirage, elles seraient rendues. Écrire le
+   chiffre le plus haut des trois colonnes sans cette phrase serait précisément
+   le genre de publication que ce projet ne peut pas se permettre. Et il se lit
+   famille par famille, jamais en bloc : `METHODE.md` §1.2 dit pourquoi un taux
+   d'abstention global est une moyenne de cinq difficultés sans rapport.
 
 ---
 
@@ -449,8 +537,9 @@ $PY evaluation/banc_bout_en_bout.py --recuperation reel --repondeur temoin --red
 $PY evaluation/banc_bout_en_bout.py --recuperation reel --repondeur temoin --redacteur fidele
 $PY evaluation/banc_bout_en_bout.py --recuperation reel --repondeur temoin --redacteur menteur
 
-# Le 32 repris au §5 ne sort pas d'ici : il sort de la courbe d'abstention de
-# CONCEPTION.md §4, dont la commande est au §10 du même document.
+# Le nombre de bonnes premières réponses que le §5 confronte à ce banc ne sort
+# pas d'ici : il sort de la courbe d'abstention de CONCEPTION.md §4, dont la
+# commande est au §10 du même document.
 
 # Le détail question par question, et le JSON pour un suivi dans le temps.
 $PY evaluation/banc_bout_en_bout.py --recuperation reel --detail
@@ -464,13 +553,17 @@ $PY evaluation/banc_bout_en_bout.py --recuperation reel \
 Si l'index dense manque, `--recuperation reel` s'arrête en nommant la commande à
 lancer (`python -m noyau.indexer`) : c'est le noyau qui le dit, pas le banc.
 
-Durées d'**une** exécution, sur la machine qui a écrit ce fichier et sous une
-charge que personne ne peut reproduire : **0,47 s** pour le mode `idf`,
+Durées d'**une** exécution, sur la machine qui a écrit ce fichier, sous une
+charge que personne ne peut reproduire, et **sur le jeu tel qu'il était alors**,
+avant l'élargissement de l'ensemble hors corpus : **0,47 s** pour le mode `idf`,
 **3,76 s** pour le mode `reel` — dont l'essentiel est le chargement du modèle
-ONNX et les 64 requêtes denses — et une dizaine de secondes pour la suite de
-tests complète. Le factice ne coûte rien ;
-un vrai modèle coûterait 64 appels réseau et la durée n'aurait plus aucun
-rapport.
+ONNX et une requête dense par question — et une dizaine de secondes pour la
+suite de tests complète. Elles ne sont pas remesurées : une durée se périme à
+chaque machine et à chaque charge, et la replacer à chaque rejeu publierait le
+bruit d'une session au lieu d'un ordre de grandeur. Le factice ne coûte rien ;
+un vrai modèle coûterait un appel réseau par rédaction observée — leur nombre
+est à la ligne « rédactions observées » de `MESURES.md` §D.1 — et la durée
+n'aurait plus aucun rapport.
 
 ### Les trois formes de branchement d'un répondeur extérieur
 
@@ -520,17 +613,25 @@ jusque-là, les laisser vides est la seule valeur honnête.
   ou un modèle juge.
 - **Il ne mesure pas la pertinence d'un article réel et récupéré.** La garde
   vérifie une provenance. Un article hors sujet passe, et seule la grandeur 1 le
-  voit — sur 14 réponses rendues en mode `mixte` (modèle factice), **4 ne citent
-  aucun article attendu** tout en ayant franchi la garde.
-- **Il n'a jamais mesuré un modèle de langue.** Aucun des chiffres du §6 n'est un
-  chiffre de production. Ce que le §6 mesure est la chaîne.
-- **Le jeu de 64 questions est celui des fondations**, avec toutes ses limites,
-  qui sont écrites dans `METHODE.md` et ne sont pas levées ici : écrit par la
-  même main que le système, 57 articles visités sur 589 — deux comptes repris de
-  `METHODE.md`, qui fait foi pour la composition du jeu, et de `MESURES.md` §B
-  pour le corpus, et non remesurés ici —, effectifs par catégorie trop petits
-  pour être lus comme des taux. Un écart de deux points sur 57
-  questions vaut une question.
+  voit : le banc compte, parmi les réponses **rendues**, celles qui ne citent
+  **aucun** article attendu tout en ayant franchi la garde. C'est la ligne à lire
+  en premier du §1.1 ; elle se lit dans `MESURES.md` §D.1 en complément de « au
+  moins une citation attendue », sur le nombre de réponses rendues que la même
+  colonne donne. Les deux nombres qui étaient écrits ici — « 4 sur 14 réponses
+  rendues en mode `mixte` » — étaient ceux du jeu d'avant l'élargissement.
+- **Il n'a jamais mesuré un modèle de langue.** Aucun des chiffres que le §6
+  commente n'est un chiffre de production. Ce que ce banc mesure est la chaîne.
+- **Le jeu est celui des fondations**, avec toutes ses limites, qui sont écrites
+  dans `METHODE.md` et ne sont pas levées ici : écrit par la même main que le
+  système, une part étroite du Code visitée — la couverture livre par livre est
+  au §5 de `METHODE.md`, qui fait foi pour la composition du jeu, et le total du
+  corpus dans `MESURES.md` §B —, effectifs par catégorie trop petits pour être
+  lus comme des taux. Cette puce annonçait **« le jeu de 64 questions »**, au
+  présent, au sujet d'un banc qui tourne sur un jeu élargi : l'ensemble hors
+  corpus est passé de 7 à 36 questions le 5 octobre 2026 et se lit désormais en
+  cinq familles (`METHODE.md` §1.1 et §1.2) ; le côté répondable, lui, n'a pas
+  bougé. Un effectif recopié d'un document à l'autre se périme en silence, et
+  c'est pourquoi celui-ci n'est plus écrit ici.
 - **Les cinq questions `injection` ne mesurent pas la sûreté de la génération.**
   Elles mesurent si une consigne de détournement déplace la récupération, puis,
   ici, ce que le factice en fait — c'est-à-dire rien, puisque le factice ne lit

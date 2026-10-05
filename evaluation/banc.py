@@ -143,6 +143,16 @@ def charger_questions(chemin: Path = CHEMIN_QUESTIONS) -> dict:
         return json.load(f)
 
 
+# Les cinq façons d'être hors corpus, et les deux côtés de la coupe. Ces deux
+# listes sont ici et non dans le JSON parce que c'est le banc qui refuse de
+# mesurer : une étiquette que seul le fichier déclare n'est pas une étiquette,
+# c'est un commentaire. Leur sens est écrit dans questions.json (meta) et leur
+# composition dans METHODE.md § 1.
+FAMILLES_HORS_CORPUS = ("etrangere", "autre_branche", "travail_hors_corpus",
+                        "limitrophe", "mal_posee")
+VOLETS = ("reglage", "verification")
+
+
 def controler_jeu(jeu: dict, corpus: dict) -> list[str]:
     """Vérifie que le jeu est utilisable AVANT de mesurer quoi que ce soit.
 
@@ -184,6 +194,46 @@ def controler_jeu(jeu: dict, corpus: dict) -> list[str]:
             anomalies.append(f"{ident} : étiquetée sans_reponse mais des articles sont attendus")
         if not sans_reponse and not attendus:
             anomalies.append(f"{ident} : aucun article attendu sans l'étiquette sans_reponse")
+
+        # Une question hors corpus sans famille ni volet retomberait dans le
+        # taux global sans qu'on sache ce qu'elle y apporte, et c'est ce taux
+        # global indifférencié qui a fait publier 85,7 % d'abstention mesurés
+        # sur sept cas. Les deux clés sont donc exigées, et interdites
+        # ailleurs : posées sur une question répondable, elles mentiraient.
+        famille = q.get("famille_hors_corpus")
+        volet = q.get("volet")
+        if sans_reponse:
+            if famille not in FAMILLES_HORS_CORPUS:
+                anomalies.append(
+                    f"{ident} : famille_hors_corpus {famille!r} inconnue "
+                    f"(attendu : {', '.join(FAMILLES_HORS_CORPUS)})")
+            if volet not in VOLETS:
+                anomalies.append(f"{ident} : volet {volet!r} inconnu "
+                                 f"(attendu : {', '.join(VOLETS)})")
+        else:
+            if famille is not None:
+                anomalies.append(f"{ident} : famille_hors_corpus sur une "
+                                 f"question qui a une réponse dans le Code")
+            if volet is not None:
+                anomalies.append(f"{ident} : volet sur une question qui a une "
+                                 f"réponse dans le Code")
+
+    # La coupe est le garde-fou de tout le reste, et c'est elle qui dérivera le
+    # plus vite : il suffit d'ajouter trois questions faciles du même côté pour
+    # que la moitié de vérification cesse de ressembler à la moitié de réglage,
+    # et le chiffre final redevient alors un artefact de composition. Le banc
+    # exige donc que chaque famille soit coupée en deux à une question près.
+    hors = [q for q in jeu["questions"] if "sans_reponse" in q.get("etiquettes", [])]
+    for famille in FAMILLES_HORS_CORPUS:
+        lot = [q for q in hors if q.get("famille_hors_corpus") == famille]
+        if not lot:
+            continue
+        reglage = sum(1 for q in lot if q.get("volet") == "reglage")
+        if abs(2 * reglage - len(lot)) > 1:
+            anomalies.append(
+                f"famille {famille} : coupe déséquilibrée — {reglage} en réglage "
+                f"sur {len(lot)}, l'écart entre les deux moitiés doit rester "
+                f"d'au plus une question")
 
     # Les couples sont le cœur du jeu, et ce sont eux qui dérivent le plus
     # vite : une paire déclarée d'un seul côté donne un couple qui n'existe
@@ -458,11 +508,29 @@ class Resultats:
             return None
         return sum(1.0 for l in lignes if l["touche"][k]) / len(lignes)
 
-    def abstention(self) -> float | None:
-        lignes = self.sans_reponse
+    def abstention(self, lignes: Sequence[dict] | None = None) -> float | None:
+        """Part des questions hors corpus où la récupération n'a RIEN renvoyé.
+
+        Le paramètre existe pour que ce taux puisse être rendu famille par
+        famille et moitié par moitié. Un taux unique sur tout l'ensemble
+        mélange des difficultés qui n'ont rien à voir : une question de
+        cuisine et une question sur la jurisprudence de la Cour de cassation
+        ne mesurent pas la même chose, et la moyenne des deux ne mesure
+        aucune des deux. Lu en bloc, il dit surtout de quoi l'ensemble est
+        composé — c'est ainsi qu'un 85,7 % obtenu sur sept cas a pu être
+        publié comme une garantie.
+        """
+        lignes = self.sans_reponse if lignes is None else [
+            l for l in lignes if not l["attendus"]]
         if not lignes:
             return None
         return sum(1.0 for l in lignes if not l["retrouves"]) / len(lignes)
+
+    def hors_corpus(self, famille: str | None = None,
+                    volet: str | None = None) -> list[dict]:
+        return [l for l in self.sans_reponse
+                if (famille is None or l["famille"] == famille)
+                and (volet is None or l["volet"] == volet)]
 
     def bruit(self) -> float | None:
         lignes = self.sans_reponse
@@ -538,6 +606,8 @@ def executer(recuperer: Callable, jeu: dict, corpus: dict,
             "id": q["id"],
             "question": q["question"],
             "etiquettes": q.get("etiquettes", []),
+            "famille": q.get("famille_hors_corpus"),
+            "volet": q.get("volet"),
             "paire": list(q.get("paire", [])),
             "attendus": attendus,
             "toleres": set(q.get("articles_toleres", [])),
@@ -597,6 +667,31 @@ def ecrire_verite_de_reference(jeu: dict, corpus: dict) -> None:
           f"{len(toleres - attendus):4d}")
     print(f"  {'union attendus + tolérés':46}"
           f"{len(toleres | attendus):4d} / {total} articles du Code")
+    print()
+    ecrire_composition_hors_corpus(jeu)
+
+
+def ecrire_composition_hors_corpus(jeu: dict) -> None:
+    """Imprime la composition de l'ensemble hors corpus : familles et coupe.
+
+    C'est la source unique des effectifs publiés dans METHODE.md § 1. Ils sont
+    imprimés ici parce qu'un effectif compté à la main dérive dès la question
+    suivante, et parce que c'est le seul chiffre qui permette de lire un taux
+    d'abstention : une proportion dont on ne dit pas sur combien de cas elle
+    est calculée n'est pas une mesure. Sept cas ne font pas une garantie.
+    """
+    hors = [q for q in jeu["questions"] if "sans_reponse" in q.get("etiquettes", [])]
+    print("  Composition de l'ensemble hors corpus")
+    print("  " + "-" * 62)
+    print(f"  {'':24}{'total':>7}{'réglage':>10}{'vérif.':>9}")
+    for famille in FAMILLES_HORS_CORPUS:
+        lot = [q for q in hors if q.get("famille_hors_corpus") == famille]
+        reglage = sum(1 for q in lot if q.get("volet") == "reglage")
+        print(f"  {famille:24}{len(lot):7d}{reglage:10d}{len(lot) - reglage:9d}")
+    reglage = sum(1 for q in hors if q.get("volet") == "reglage")
+    print(f"  {'ensemble hors corpus':24}{len(hors):7d}{reglage:10d}"
+          f"{len(hors) - reglage:9d}")
+    print(f"  {'questions du jeu':24}{len(jeu['questions']):7d}")
     print()
 
 
@@ -691,10 +786,43 @@ def ecrire_rapport(res: Resultats, detail: bool = False) -> None:
 
     print("  Sur les questions sans réponse — savoir se taire")
     print("  " + "-" * 62)
-    print(f"  {'abstention correcte':34}{_pc(res.abstention())}   (n={len(sans)})")
+    print(f"  {'abstention correcte':34}{_pc(res.abstention())}"
+          f"   ({sum(1 for l in sans if not l['retrouves'])} / {len(sans)})")
     bruit = res.bruit()
     print(f"  {'articles renvoyés en moyenne':34}"
           f"{'     —' if bruit is None else f'{bruit:6.2f}'}   (sur {K_MAX} possibles)")
+    print()
+
+    # Le taux global ci-dessus ne se publie jamais seul, et c'est la leçon la
+    # plus chère du projet : 85,7 % d'abstention correcte ont été annoncés
+    # comme une garantie alors qu'ils valaient 6 réussites sur 7 questions,
+    # toutes du même genre. Les deux tableaux qui suivent empêchent de le
+    # refaire — le premier dit sur QUOI le taux est obtenu, le second dit s'il
+    # tient sur la moitié qui n'a pas servi à régler le seuil.
+    # Le décompte est imprimé à côté du taux, et pas seulement l'effectif :
+    # « 85,7 % » se recopie dans un document, « 6 / 7 » ne s'y recopie pas sans
+    # que le lecteur voie aussitôt ce que vaut la mesure.
+    def _ligne(nom: str, lot: list[dict]) -> None:
+        tus = sum(1 for l in lot if not l["retrouves"])
+        print(f"  {nom:24}{_pc(res.abstention(lot)):>12}"
+              f"   {tus} / {len(lot)}")
+
+    print("  Abstention par façon d'être hors corpus")
+    print("  " + "-" * 62)
+    for famille in FAMILLES_HORS_CORPUS:
+        lot = res.hors_corpus(famille)
+        if lot:
+            _ligne(famille, lot)
+    print()
+
+    print("  Abstention de part et d'autre de la coupe")
+    print("  " + "-" * 62)
+    print("  Un seuil choisi sur « réglage » ne vaut que ce qu'il donne sur")
+    print("  « vérification », qui n'a pas servi à le choisir.")
+    for volet in VOLETS:
+        lot = res.hors_corpus(volet=volet)
+        if lot:
+            _ligne(volet, lot)
     print()
     print("  Contrepoids à lire avec l'abstention")
     print("  " + "-" * 62)

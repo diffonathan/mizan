@@ -20,6 +20,14 @@
 *.woff2 binary
 *.pdf binary
 
+# L'index vectoriel est le SEUL fichier de vecteurs versionné (voir le
+# paragraphe de `.gitignore` qui lève l'interdiction pour lui). Un .npz est
+# une archive zip : `text=auto` la détecte comme binaire aujourd'hui, mais on
+# ne laisse pas une heuristique décider du sort d'un fichier dont une
+# normalisation de fins de ligne ferait un index CORROMPU — et un index
+# corrompu ne se voit pas dans une revue, il se voit au démarrage.
+*.npz binary
+
 # Le schéma GraphQL est produit par le serveur, mais VERSIONNÉ exprès : un
 # champ nouvellement exposé doit se voir dans une revue de code. On le marque
 # comme généré pour que GitHub le replie par défaut, sans l'exclure des

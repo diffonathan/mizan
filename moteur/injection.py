@@ -335,7 +335,7 @@ def examiner(question: str, seuil: int = SEUIL_SIGNALEMENT) -> Signalement:
     """Cherche dans la question des tournures adressées à l'assistant.
 
     Le seuil est un paramètre et non une constante enfouie, pour la même raison
-    que le seuil de marge du noyau : une valeur qu'on ne peut pas déplacer sans
+    que le seuil d'abstention du noyau : une valeur qu'on ne peut pas déplacer sans
     modifier le code est une valeur qu'on ne recalibrera jamais.
     """
     texte = _normaliser(question or "")
@@ -821,8 +821,9 @@ def _mesurer_frontiere() -> None:
         sur=True,
         pourquoi="Mesure.",
         avertissement="Texte consolidé au 26 octobre 2011.",
+        proximite=0.6,
+        seuil_proximite=0.46,
         marge=0.1,
-        seuil_marge=0.04,
     )
     invite = assembler(forge, resultat)
     dedans = (

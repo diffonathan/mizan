@@ -27,13 +27,85 @@ __pycache__/
 .ruff_cache/
 .mypy_cache/
 
-# Vecteurs calculés. Ils dérivent du corpus et du modèle : les versionner
-# créerait une troisième source de vérité qui dériverait des deux autres sans
-# que rien ne le signale.
+# ── Vecteurs calculés ──────────────────────────────────────────────────────
+#
+# CE QUE CE PARAGRAPHE DISAIT, ET QUI RESTE VRAI
+#
+#   « Ils dérivent du corpus et du modèle : les versionner créerait une
+#     troisième source de vérité qui dériverait des deux autres sans que rien
+#     ne le signale. »
+#
+# Cet argument n'est pas abandonné, il est APPLIQUÉ : la règle tient toujours
+# pour tous les fichiers de vecteurs du dépôt — ceux des prototypes, ceux de
+# l'arbitrage, et tout ce qu'un outil futur déposera. Une seule exception est
+# faite, et uniquement parce que, pour ce fichier-là, la dérive n'est plus
+# silencieuse.
+#
+# POURQUOI L'INTERDICTION EST LEVÉE POUR L'INDEX DE PRODUCTION
+#
+# La phrase ci-dessus ne condamne pas les vecteurs versionnés : elle condamne
+# une dérive QUE RIEN NE SIGNALE. Ici, quelque chose la signale, et ce n'est
+# pas une consigne mais un refus :
+#
+#   • `noyau/indexer.py` écrit l'empreinte SHA-256 des passages DANS les
+#     métadonnées du .npz, au moment où il le calcule ;
+#   • `noyau.dense.lire_index` relit cette empreinte, la compare au corpus
+#     présent, et lève `IndexAbsent` si elle ne correspond pas — en donnant
+#     la commande de reconstruction ;
+#   • `tests/test_index_scelle.py` épingle les DEUX moitiés du contrat : que
+#     l'index livré colle au corpus livré, et qu'une empreinte truquée est
+#     bien refusée par le chemin de production.
+#
+# Un corpus réextrait et un index périmé ne rendent donc pas des réponses
+# fausses mais plausibles — le mode de panne que cette interdiction visait.
+# Ils font échouer le démarrage. La troisième source de vérité existe, mais
+# elle est SCELLÉE sur la première, et c'est ce qui change la décision.
+#
+# CE QUE L'EXCEPTION ACHÈTE
+#
+# 1,8 Mo dans le dépôt, contre un quart d'heure d'indexation et une dizaine de
+# gigaoctets de mémoire à CHAQUE redémarrage d'un Space Hugging Face, dont le
+# disque n'est pas persistant. Sans l'index versionné, la cible de déploiement
+# du projet est inatteignable. Voir DEPLOIEMENT.md.
+#
+# D'OÙ VIENNENT CE QUART D'HEURE ET CES DIX GIGAOCTETS, ET POURQUOI PAS PLUS
+# PRÉCISÉMENT
+#
+# Ces deux grandeurs ont UNE source : le §6 de CONCEPTION.md, qui publie
+# exprès un ordre de grandeur et sa dispersion — les trois indexations
+# connues du même calcul s'écartent d'un rapport d'une fois et demie — et non
+# une durée. Aucune valeur précise n'est recopiée ici, et ce n'est pas de la
+# précaution : une interdiction qui existe pour rendre une dérive bruyante ne
+# peut pas s'appuyer sur un chiffre qui dérive en silence.
+# `arbitrage/res_froid.json` garde les durées de la dernière indexation, mais
+# ses notes d'entête disent qu'elles ont été reportées d'une exécution
+# antérieure par `--relire` : ce n'est pas une source pour une durée, et le
+# fichier le dit lui-même.
+#
+# LA CONTREPARTIE, QU'IL FAUT CONNAÎTRE AVANT DE TOUCHER AU CORPUS
+#
+# Réextraire le corpus OBLIGE désormais à reconstruire l'index et à le
+# recommitter (`python -m noyau.indexer --forcer`). C'est le prix de
+# l'exception. Il est visible : tant que ce n'est pas fait, le démarrage
+# refuse de servir au lieu de répondre de travers.
+#
+# CE QUE L'EMPREINTE NE COUVRE PAS
+#
+# Elle scelle l'index sur le CORPUS, pas sur le modèle de plongement : on ne
+# prend pas l'empreinte de 1,2 Go de poids à chaque démarrage. Le nom du
+# modèle écrit dans les métadonnées est la seule trace de ce couple. Changer
+# de modèle d'embedding sans reconstruire l'index passerait donc le contrôle.
+# C'est la limite connue du mécanisme, et elle est redite dans DEPLOIEMENT.md
+# plutôt que laissée à découvrir.
 *.npy
 *.npz
 *.faiss
 *.index
+
+# L'exception, nommée fichier par fichier et jamais par motif large : un
+# `!*.npz` rouvrirait la porte à tous les vecteurs du dépôt, y compris ceux
+# que personne n'a scellés.
+!.cache_vecteurs/dense-google_embeddinggemma-300m.npz
 
 # Secrets. La convention du projet est LLM_PROVIDER / LLM_API_KEY / LLM_MODEL.
 .env

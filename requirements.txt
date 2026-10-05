@@ -41,6 +41,38 @@ tokenizers==0.23.2
 huggingface_hub==1.33.0
 numpy==2.5.3
 
+# ── Service HTTP ───────────────────────────────────────────────────────────
+#
+# L'interface de `service/` est servie par une application FastAPI derrière
+# uvicorn, sur le port 7860 qu'attend Hugging Face.
+#
+# CES DEUX LIGNES SONT LA SEULE SOURCE DE CES VERSIONS. Aucun Dockerfile,
+# aucun `service/requirements.txt`, aucun second fichier ne doit les
+# réépingler : deux fichiers qui épinglent la même chose finissent par
+# épingler deux choses, et c'est le `pip install` le plus tardif qui gagne —
+# silencieusement, et pas forcément celui qu'on a mesuré.
+#
+# Ce sont les versions sur lesquelles les 24 tests de route de
+# `tests/test_service_routes.py` passent, et sous lesquelles le service a été
+# démarré pour de vrai : port ouvert, `/sante`, `/api/etat`, `/api/question`
+# et l'interface statique répondent.
+#
+#     python -m unittest discover -s tests -t tests -q
+#
+# Pourquoi `uvicorn` et non `uvicorn[standard]` : les extras apportent une
+# implémentation WebSocket, un surveillant de fichiers pour `--reload` et
+# `uvloop` (qui n'existe pas sous Windows). Ce service ne tient aucune
+# connexion longue, et il se recharge en reconstruisant son image. Installer
+# six paquets pour trois choses qu'on n'appelle pas, c'est six paquets de plus
+# à épingler le jour où l'un d'eux casse.
+#
+# LA BIBLIOTHÈQUE, ELLE, N'EN A PAS BESOIN. `noyau`, `moteur`, les deux bancs
+# et `service/contrat.py` + `service/chargement.py` — où vit toute la logique
+# du service — tournent sans ces deux paquets. Les tests de route sont les
+# seuls à les exiger, et ils se sautent en disant quoi lancer.
+fastapi==0.142.2
+uvicorn==0.54.0
+
 # ── Ce que ce fichier n'installe PAS, et qu'il faut savoir ──────────────────
 #
 # LE MODÈLE DE PLONGEMENT. fastembed le télécharge au premier usage —

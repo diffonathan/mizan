@@ -42,7 +42,16 @@ elles.
 
 ## 1. La décision
 
-**Récupération dense en tête, lexicale en queue, abstention par la marge.**
+**Récupération dense en tête, lexicale en queue, abstention par la proximité.**
+
+*(La décision d'abstention s'est longtemps prise sur la MARGE entre les deux
+premiers candidats ; elle se prend désormais sur la PROXIMITÉ — le score dense
+ABSOLU du premier article —, et le §4 dit pourquoi. Partout où ce document
+parle de « seuil de marge », il décrit la règle REMPLACÉE, et il le signale à
+l'endroit où il le fait : un document qui expliquerait encore le verdict par un
+écart entre deux rangs décrirait un produit qui n'existe plus. La marge n'était
+pas « inversée » pour autant — son aire sous la courbe est au-dessus de 0,5 —,
+elle sépare mal, et le §4 donne les deux aires.)*
 
 Concrètement, pour chaque question :
 
@@ -51,9 +60,12 @@ Concrètement, pour chaque question :
    et fournit les **rangs 1 à 3**.
 2. Le bras **lexical** (BM25 Okapi, bibliothèque standard seule) remplit les
    **rangs 4 et 5** avec ses meilleurs articles pas déjà présents.
-3. La **marge** entre le premier et le deuxième score dense décide du
-   registre de la réponse : au-dessus du seuil, l'article de tête est désigné
-   comme la réponse ; en dessous, il ne l'est pas.
+3. La **proximité** — le score dense ABSOLU du premier article, au seuil
+   `SEUIL_PROXIMITE = 0,46` de `noyau/recherche.py` — décide du registre de la
+   réponse : au-dessus du seuil, l'article de tête est désigné comme la
+   réponse ; en dessous, il ne l'est pas. Ce point a longtemps décrit la
+   **marge** entre le premier et le deuxième score dense ; ce n'est plus la
+   règle du produit, et le §4 dit sur quelle mesure elle a été remplacée.
 4. **(spécifié, pas encore écrit)** Ce qu'un usager voit. Chaque article
    affiché devra porter sa citation hiérarchique, sa page dans le PDF d'Adala,
    le détail terme par terme de son score lexical quand il vient du bras
@@ -75,17 +87,45 @@ Mesuré sur le jeu indépendant, les trois lignes qui résument la décision :
 
 | | rappel@1 | @3 | @5 | abstention correcte | dérobade |
 |---|---|---|---|---|---|
-| plancher naïf du jeu (`mots`) | 30,7 | 46,5 | 50,9 | 0,0 | 0,0 |
-| **retenu, sans abstention** | **61,1** | **84,5** | **91,5** | 0,0 | 0,0 |
-| **retenu, marge ≥ 0,04** | 50,0 | 58,8 | 60,5 | **85,7** | 36,8 |
+| plancher naïf du jeu (`mots`) | 30,7 | 46,5 | 50,9 | 0 sur 36 | 0 sur 57 |
+| **retenu, sans abstention** | **61,1** | **84,5** | **91,5** | 0 sur 36 | 0 sur 57 |
+| retenu, marge ≥ 0,04 *(signal REMPLACÉ)* | 50,0 | 58,8 | 60,5 | **22 sur 36** | 21 sur 57 — 36,8 % |
+| **retenu, proximité ≥ 0,46** | **61,1** | **84,5** | **89,8** | **27 sur 36** | **2 sur 57 — 3,5 %** |
+
+Les deux colonnes de droite portent leur effectif **à chaque ligne**, et les
+quatre lignes sont lues sur le même jeu : 36 questions hors corpus, 57
+répondables. La commande qui imprime les deux dernières abstentions avec leur
+dénominateur est nommée par `MESURES.md` §A.3.
+
+**Les deux dernières lignes ne décrivent pas le même système.** La troisième
+est celle d'un signal qui n'est plus en place ; la quatrième est le produit
+d'aujourd'hui. La colonne d'abstention a longtemps affiché « 85,7 *(6 sur 7)* »
+sur la ligne de la marge en face de « 27 sur 36 » sur celle de la proximité :
+deux mesures prises sur deux ensembles différents, posées côte à côte dans une
+colonne qui invite à les soustraire. **Cela ne comparait rien**, et le
+pourcentage était le plus trompeur des deux, puisque 85,7 % valait six
+réussites sur sept. Les deux lignes sont maintenant lues sur le même jeu, en
+effectifs, et c'est ce qui rend l'écart de cinq questions lisible.
+
+La même règle vaut pour la dérobade, écrite en effectif avant de l'être en
+pourcentage : « 36,8 % » est 21 silences sur 57 questions répondables, et
+« 3,5 % » en est 2. Le jeu hors corpus est coupé en deux moitiés dont l'une n'a
+jamais servi à régler le seuil : 14 sur 18 d'un côté, 13 sur 18 de l'autre. La
+source unique de tous ces chiffres est `MESURES.md` §A.3.
+
+Et la quatrième ligne n'est pas un meilleur compromis, c'est un **gain des deux
+côtés** : le rappel@1 et le rappel@3 reviennent au plafond « répondre à tout »,
+le rappel@5 lui cède 1,7 point, et la dérobade tombe de 36,8 % à 3,5 % — deux
+questions sur 57, qui sont les deux injections du jeu.
 
 La troisième ligne se lit mal en rappel, et c'est normal : le banc compte une
 abstention comme un rappel nul. En nombres absolus, c'est l'échange suivant —
 **40 bonnes premières réponses et 17 fausses** si l'on répond à tout, contre
-**32 bonnes et 4 fausses** avec le seuil, et six des sept questions hors
-corpus qui cessent de recevoir une réponse inventée. Le §4 détaille cet
-arbitrage, qui est le cœur de la décision ; le seuil reste un paramètre dont
-le §4 explique pourquoi sa valeur par défaut n'est pas encore établie.
+**32 bonnes et 4 fausses** avec le seuil de marge. Le §4 détaille cet
+arbitrage, qui a été le cœur de la décision — mais **tout le §4 est daté du jeu
+d'alors, qui comptait 7 questions hors corpus et non 36** : ses colonnes
+« hors-corpus refusés » se lisent « sur 7 », et aucune d'elles ne se compare à
+un « sur 36 » du tableau ci-dessus.
 
 **Deux précautions de lecture sur la troisième ligne**, qui est la plus
 importante du tableau et la plus facile à mal lire.
@@ -288,10 +328,20 @@ contrepartie.
 Une réponse fausse en droit n'est pas une imprécision. Le jeu d'évaluation le
 dit à sa manière : son plancher a **0 % d'abstention correcte**, il renvoie
 cinq articles aux sept questions dont la réponse n'est pas dans le Code, et
-un témoin qui se tait toujours obtient, remesuré ici, **100 % d'abstention
-correcte, 0 % de rappel et 100 % de dérobade**. Les deux chiffres ne se
-lisent donc jamais l'un sans l'autre : à ne regarder que l'abstention, le
-meilleur système du banc est celui qui ne répond à rien.
+un témoin qui se tait toujours obtient, remesuré ici, **7 abstentions correctes
+sur 7, 0 % de rappel et 57 dérobades sur 57**. Les deux chiffres ne se lisent
+donc jamais l'un sans l'autre : à ne regarder que l'abstention, le meilleur
+système du banc est celui qui ne répond à rien.
+
+> **Avertissement d'effectif, et il porte sur tout ce §4.** Les colonnes
+> « hors-corpus refusés » et les abstentions de cette section sont mesurées sur
+> les **7** questions hors corpus du jeu de l'époque. Le jeu en compte **36**
+> depuis, en cinq familles et coupé en deux moitiés, et le point de
+> fonctionnement d'aujourd'hui est publié sur ces 36 par `MESURES.md` §A.3.
+> **Aucun « sur 7 » de ce §4 ne se compare à un « sur 36 ».** Ces mesures sont
+> gardées parce qu'elles sont la trace de l'arbitrage, pas parce qu'elles
+> décrivent le produit — c'est exactement la confusion qui avait mis « 85,7 %
+> *(6 sur 7)* » en face de « 27 sur 36 » dans la même colonne du §1.
 
 ### Ce qui sépare, et ce qui ne sépare pas
 
@@ -299,26 +349,74 @@ Quatre signaux proposés par les candidats, mesurés sur les 57 questions
 répondables, en comparant les 40 où le bras dense a raison au rang 1 aux
 17 où il a tort :
 
-| signal | justes (n=40) | faux (n=17) | verdict |
+| signal | justes (n=40) | faux (n=17) | sépare le JUSTE du FAUX ? |
 |---|---|---|---|
-| **marge** 1er/2e | min 0,006 · méd **0,081** · max 0,315 | min 0,002 · méd **0,029** · max 0,110 | **sépare** |
-| score de similarité | 0,472 – 0,721 | 0,458 – 0,641 | ne sépare pas |
-| accord des deux bras | méd **2,0** | méd **2,0** | ne sépare pas |
-| couverture lexicale | méd 1,000 | méd 0,833 | ne sépare pas |
+| **marge** 1er/2e | min 0,006 · méd **0,081** · max 0,315 | min 0,002 · méd **0,029** · max 0,110 | **oui, un peu** |
+| score de similarité | 0,472 – 0,721 | 0,458 – 0,641 | non |
+| accord des deux bras | méd **2,0** | méd **2,0** | non |
+| couverture lexicale | méd 1,000 | méd 0,833 | non |
+
+La dernière colonne s'appelait « verdict », et c'est ce mot qui a fait les
+dégâts : une cellule de tableau se lit seule, et « **sépare** » en face de la
+marge se lisait comme un verdict sur l'ABSTENTION. Elle ne dit rien de
+l'abstention. L'en-tête nomme désormais la seule question que ces trois
+colonnes posent.
+
+> **CE TABLEAU EST JUSTE ET IL A FAIT PRENDRE LA MAUVAISE DÉCISION.** Il mesure
+> les signaux sur *réponse juste contre réponse fausse*. Or l'abstention ne pose
+> pas cette question-là : elle pose *la réponse est-elle dans le Code, oui ou
+> non*. Ce ne sont pas les mêmes populations, et le chevauchement de la première
+> ne dit rien de la seconde.
+>
+> Mesuré sur la bonne question par `arbitrage/abstention.py`, le classement
+> s'inverse : le score de similarité du premier article obtient une aire sous la
+> courbe de **0,978** sur la moitié de réglage et **0,937** sur la moitié de
+> vérification, contre **0,607** et **0,596** pour la marge. Les deux nuages se
+> séparent presque — minimum 0,458 pour les questions du corpus, maximum 0,491
+> pour les étrangères. C'est donc le score, et non la marge, qui décide
+> aujourd'hui, sous le nom de `proximite`. Une ligne du tableau, une commande :
+>
+> ```sh
+> P=prototypes/vectoriel/.venv/Scripts/python.exe
+> $P arbitrage/abstention.py              # moitié de réglage    → marge 0,607 · score1 0,978
+> $P arbitrage/abstention.py --controle   # moitié de vérification → marge 0,596 · score1 0,937
+> ```
+>
+> **Et la marge n'est pas « inversée ».** Le chantier a été ouvert sur ce récit,
+> appuyé sur quatre exemples bien choisis que le banc réimprime sous le titre
+> « LE DÉFAUT, RECONSTATÉ ». Mais 0,607 est AU-DESSUS de 0,5 : la marge porte un
+> peu d'information, et dans le BON sens — médianes 0,0568 pour les questions du
+> corpus contre 0,0353 pour les étrangères, l'ordre attendu. Son défaut est de
+> séparer **mal**, 0,607 contre 0,978, pas de séparer à l'envers. Quatre cas ne
+> sont pas un mécanisme, et la corrélation marge/masse5 sur laquelle reposait
+> celui qu'on racontait vaut **−0,035** sur les 93 questions, c'est-à-dire rien.
+> Ces quatre aires sont écrites ici et nulle part ailleurs : cette section en
+> est la source unique, et `MESURES.md` §A.3 y renvoie.
+>
+> La leçon vaut plus que le résultat : **supposer au lieu de mesurer a coûté
+> deux revues.** Le signal avait été écarté sur une mesure exacte répondant à
+> une autre question que celle qu'on lui posait.
 
 Trois de ces quatre résultats confirment une mise en garde qu'un candidat
 avait écrite et qu'il aurait été tentant de ne pas revérifier. Le score de
 similarité, en particulier, est le signal que n'importe quelle interface
-afficherait comme « confiance » : les deux intervalles se recouvrent presque
-entièrement, et l'afficher serait un mensonge chiffré.
+afficherait **par article** comme « confiance » : les deux intervalles se
+recouvrent presque entièrement, et l'afficher ainsi serait un mensonge chiffré.
+C'est pourquoi le contrat public expose le score du PREMIER article — celui qui
+décide — et garde les autres cachés.
 
-### La courbe d'abstention, publiée en entier
+### La courbe d'abstention de la marge, publiée en entier *(signal remplacé)*
+
+Cette courbe est celle du signal qui N'EST PLUS EN PLACE. Elle est gardée parce
+qu'elle est la preuve de ce qu'il coûtait, et parce que le tutoriel la rejoue.
+La courbe du signal retenu s'imprime avec `arbitrage/abstention.py --regle
+score1:0.46`, et son point de fonctionnement est publié par `MESURES.md` §A.3.
 
 Bras dense, seuil sur la marge. `service` = part des 57 questions répondables
 où le système accepte de répondre ; `just@1` = parmi ces réponses, part dont
 un article attendu est au rang 1.
 
-| seuil de marge | service | just@1 | just@3 | bons@1 | bons@3 | hors-corpus refusés |
+| seuil de marge *(règle remplacée)* | service | just@1 | just@3 | bons@1 | bons@3 | hors-corpus refusés |
 |---|---|---|---|---|---|---|
 | aucun (répondre à tout) | 100,0 | 70,2 | 87,7 | 40 | 50 | 0 / 7 |
 | ≥ 0,01 | 86,0 | 73,5 | 91,8 | 36 | 45 | 1 / 7 |
@@ -758,10 +856,13 @@ Chacune de ces conditions est une mesure à faire, pas une opinion à réviser.
    Si l'écart `usager` entre dense et lexical (82,1 contre 35,2 au rang 3) ne
    survit pas à un tel banc, la décision tombe, parce que c'est le seul
    argument qui justifie 1 362 Mo.
-2. **Si le seuil de marge ne se recalibre pas.** Si, sur des questions
-   nouvelles, la marge ne sépare plus justes et faux, l'abstention retombe sur
-   l'accord des deux bras (6 refus sur 7 hors-corpus, sans seuil numérique) et
-   le registre affirmatif devient l'exception.
+2. **Si le seuil de proximité ne se recalibre pas.** `SEUIL_PROXIMITE = 0,46`
+   est un cosinus propre à `embeddinggemma-300m` : changer de modèle de
+   plongement l'invalide, là où la marge qu'il remplace, étant un écart entre
+   deux rangs, y survivait. Si, sur des questions nouvelles, la proximité ne
+   sépare plus le corpus de l'étranger, l'abstention retombe sur l'accord des
+   deux bras (6 refus sur les 7 hors-corpus de l'époque, sans aucun seuil
+   numérique) et le registre affirmatif devient l'exception.
 3. **Si l'hébergement n'offre pas 1 536 Mo.** Il n'y a alors **pas** de
    repli dense : MiniLM et potion sont mesurés sous le plancher naïf. Le repli
    est BM25 avec Snowball — **41,2 @1** si l'on greffe Snowball dans le bras
@@ -802,7 +903,9 @@ Chacune de ces conditions est une mesure à faire, pas une opinion à réviser.
    conventions collectives resterait très loin de ce seuil. Une version
    antérieure de ce paragraphe écrivait « encore moins d'un dixième à 50 000
    articles » : c'était une conséquence arithmétique fausse du rapport que la
-   phrase d'à côté publiait, et elle surévaluait la marge d'un quart.
+   phrase d'à côté publiait, et elle surévaluait d'un quart la réserve que ce
+   rapport laisse. (« Marge » au sens courant : dans ce document, c'est aussi le
+   nom du signal d'abstention remplacé, et les deux n'ont rien à voir.)
 
 ---
 

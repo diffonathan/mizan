@@ -29,7 +29,7 @@ from . import recherche as module_recherche
 
 
 class Mesure:
-    """L'architecture retenue, seuil de marge compris.
+    """L'architecture retenue, seuil de proximité compris.
 
     Le banc instancie cette classe avec les articles du corpus qu'il a lui-même
     chargé. Le noyau recharge le corpus par son propre chemin, et c'est
@@ -39,7 +39,7 @@ class Mesure:
     remplace la confiance.
     """
 
-    seuil_marge = module_recherche.SEUIL_MARGE
+    seuil_proximite = module_recherche.SEUIL_PROXIMITE
 
     def __init__(self, articles: list[dict] | None = None) -> None:
         corpus = module_corpus.charger()
@@ -49,7 +49,7 @@ class Mesure:
                 f"en porte {len(corpus.articles)} : ce n'est pas le même corpus."
             )
         self._moteur = module_recherche.Moteur(
-            corpus, module_dense.charger_bras_dense(corpus), self.seuil_marge
+            corpus, module_dense.charger_bras_dense(corpus), self.seuil_proximite
         )
 
     def __call__(self, question: str, k: int):
@@ -66,7 +66,14 @@ class MesureSansAbstention(Mesure):
     banc qui ne regarde que l'abstention est celui qui ne répond à rien.
     """
 
-    seuil_marge = 0.0
+    # -1,0 et non 0,0, et la différence n'est pas cosmétique : le signal
+    # d'abstention est désormais un COSINUS, qui vit entre -1 et 1. Un seuil à
+    # zéro ferait encore taire une question dont le meilleur article a un score
+    # négatif, et la ligne « répondre à tout » cesserait de répondre à tout —
+    # c'est-à-dire que le contrepoids obligatoire mentirait, en silence et dans
+    # le sens flatteur. Du temps de la marge, qui est un rapport positif ou nul,
+    # zéro suffisait.
+    seuil_proximite = -1.0
 
     def __call__(self, question: str, k: int):
         resultat = self._moteur.chercher(question, k=k)

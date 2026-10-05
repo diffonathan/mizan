@@ -1,0 +1,1040 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Mizan — feuille de style de l'écran de consultation.
+
+   SOURCE DES COULEURS : `CHARTE.md` (palette 19, violet profond #7c3aed) et
+   la charte maison `Projet/charte/CHARTE-24-PALETTES.md`. Aucune valeur de
+   couleur n'est écrite hors du bloc `:root` ci-dessous — c'est la règle de la
+   charte, et elle existe pour qu'un changement de palette soit un changement
+   d'une valeur et non une chasse dans les composants.
+
+   NUIT UNIQUEMENT. Aucun `prefers-color-scheme`, aucun thème clair : ce n'est
+   pas un oubli de responsive, c'est une interdiction de la charte.
+
+   LES QUATRE RÔLES, ET CE QU'ILS PORTENT ICI :
+     --primary / --accent-texte  action : la zone de question, les boutons, le
+                                 focus, et la GARDE (voir plus bas pourquoi)
+     --or                        valeur : LES CITATIONS D'ARTICLES, et rien
+                                 d'autre. Un élément doré qui ne serait pas
+                                 une citation est une faute de charte.
+     --vert                      le Code répond, et l'assistant est sûr
+     --rouge                     le Code ne traite pas la question
+
+   POURQUOI LE REJET DE LA GARDE N'EST NI VERT NI ROUGE. La charte attribue
+   deux sens, et le rejet n'est aucun des deux : la récupération était SÛRE
+   (`sur` vrai, les articles sont pertinents), mais la garde a refusé la
+   rédaction. Le peindre en rouge dirait « le Code ne traite pas cette
+   question », ce qui serait faux ; en vert, il annoncerait une réponse qui
+   n'est pas servie. Il prend donc le registre d'ACTION — la garde est un acte
+   du produit, pas une direction.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Le socle nuit, repris tel quel de la charte maison ──────────────── */
+  --nuit-1: #141417;
+  --nuit-2: #0b0b0d;
+  --nuit-3: #060607;
+  --fond: #0a0a0c;
+
+  /* Les trois halos de `body::before`, aux opacités de la charte. Ils sont
+     des jetons et non des rgba() en ligne pour que la règle « aucune couleur
+     hors de :root » reste vraie à la lettre. */
+  --halo-1: rgba(124, 58, 237, 0.12);
+  --halo-2: rgba(124, 58, 237, 0.06);
+  --halo-3: rgba(124, 58, 237, 0.05);
+
+  /* ── Rôle ACTION — palette 19, violet profond ────────────────────────── */
+  --primary: #7c3aed;
+  --primary-dim: #6630c2;          /* assombrir(accent, 0.18) */
+  --primary-fonce: #612db9;        /* assombrir(accent, 0.22) — fin du dégradé */
+  --accent-texte: #b793f5;         /* eclaircir(accent, 0.45) */
+  --accent-soft: rgba(124, 58, 237, 0.10);
+  --accent-border: rgba(124, 58, 237, 0.30);
+  --accent-glow: rgba(124, 58, 237, 0.18);
+  --grad-accent: linear-gradient(-15deg, #b793f5, #612db9);
+  --glass-border-hover: rgba(124, 58, 237, 0.35);
+
+  /* ── Rôle VALEUR — l'or, réservé aux citations d'articles ────────────── */
+  --or: #f9a825;
+  --or-dim: #c7861e;               /* assombrir(or, 0.20) — la hiérarchie */
+  --or-soft: rgba(249, 168, 37, 0.15);
+  --or-border: rgba(249, 168, 37, 0.35);
+
+  /* ── Rôles DIRECTION — « le Code répond » / « il ne traite pas » ─────── */
+  --vert: #4ade80;
+  --vert-soft: rgba(74, 222, 128, 0.12);
+  --vert-border: rgba(74, 222, 128, 0.32);
+  --rouge: #f87171;
+  --rouge-soft: rgba(248, 113, 113, 0.12);
+  --rouge-border: rgba(248, 113, 113, 0.32);
+
+  /* ── Texte et surfaces de verre (jetons de la charte maison) ─────────── */
+  --texte: #ffffff;
+  --texte-second: #d4d4d8;
+  --texte-doux: #b1b1b1;
+  --texte-faible: #63636a;
+  --verre: rgba(19, 19, 21, 0.55);
+  --verre-fort: rgba(19, 19, 21, 0.80);
+  --verre-bord: rgba(255, 255, 255, 0.08);
+  --verre-bord-moyen: rgba(255, 255, 255, 0.10);
+  --verre-liseret: rgba(255, 255, 255, 0.10);
+  --verre-ombre: 0 8px 32px rgba(0, 0, 0, 0.40);
+  --verre-flou: 12px;
+
+  /* ── Mouvement : la courbe signature de la charte ────────────────────── */
+  --courbe: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --gouttiere: 16px;
+  --rayon: 14px;
+  --rayon-petit: 9px;
+}
+
+/* ══ Socle ═══════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  /* Une question de droit du travail peut contenir un mot très long, et une
+     position hiérarchique en contient toujours. Sans ceci, la page défile
+     horizontalement à 375 px — c'est la panne de responsive la plus courante
+     sur un écran qui affiche du texte venu d'ailleurs. */
+  overflow-wrap: anywhere;
+}
+
+/* Le fond en profondeur : trois halos de l'accent sur le dégradé nuit de la
+   charte. `fixed` plutôt que `absolute` : la page défile, le fond non. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(680px 680px at 10% 4%, var(--halo-1), transparent 60%),
+    radial-gradient(760px 760px at 92% 96%, var(--halo-2), transparent 60%),
+    radial-gradient(560px 560px at 68% 30%, var(--halo-3), transparent 62%),
+    radial-gradient(120% 85% at 50% 0%, var(--nuit-1) 0%, var(--nuit-2) 55%, var(--nuit-3) 100%);
+}
+
+.page {
+  max-width: 58rem;
+  margin: 0 auto;
+  padding: 28px var(--gouttiere) 64px;
+}
+
+/* Azeret Mono est RÉSERVÉE AUX NOMBRES par la charte : numéros d'articles,
+   pourcentages, barèmes, numéros de page. Jamais de la prose. */
+.nb {
+  font-family: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.verre {
+  background: var(--verre);
+  border: 1px solid var(--verre-bord);
+  border-radius: var(--rayon);
+  box-shadow: var(--verre-ombre), inset 0 1px 0 var(--verre-liseret);
+  -webkit-backdrop-filter: blur(var(--verre-flou)) saturate(140%);
+  backdrop-filter: blur(var(--verre-flou)) saturate(140%);
+}
+
+:where(a, button, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent-texte);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.hors-ecran {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ══ En-tête ══════════════════════════════════════════════════════════════ */
+
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.entete__logo {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+}
+
+.entete__titre {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.entete__sous {
+  margin: 2px 0 0;
+  color: var(--accent-texte);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.promesse {
+  margin: 0 0 20px;
+  color: var(--texte-doux);
+  font-size: 0.95rem;
+}
+
+.promesse strong { color: var(--texte-second); font-weight: 500; }
+
+/* ══ Les deux bandeaux permanents ═════════════════════════════════════════
+   Ils ne se ferment pas, et ils sont EN HAUT. La charte leur réserve cet
+   emplacement : un assistant juridique qui laisse croire qu'il connaît le
+   droit en vigueur, ou qu'un vrai modèle a rédigé, est dangereux pour celui
+   qui s'en sert.
+
+   Ni l'un ni l'autre ne porte d'or : l'or est aux citations. Ils sont
+   distingués par la DENSITÉ et la typographie, pas par une cinquième teinte
+   — une couleur qui change de sens d'un écran à l'autre fait perdre le
+   lecteur. ══════════════════════════════════════════════════════════════ */
+
+.bandeaux {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.bandeau {
+  display: flex;
+  gap: 12px;
+  padding: 13px 15px;
+  border-radius: var(--rayon-petit);
+  font-size: 0.9rem;
+}
+
+.bandeau__icone {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+
+.bandeau__corps { min-width: 0; }
+
+.bandeau__titre {
+  margin: 0 0 3px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.bandeau p { margin: 0; }
+
+/* Le bandeau de date : le plus discret des deux, mais permanent. */
+.bandeau--date {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  color: var(--texte-doux);
+}
+
+.bandeau--date .bandeau__titre { color: var(--texte); }
+.bandeau--date .bandeau__icone { color: var(--accent-texte); }
+
+/* Le bandeau de rédaction factice : surface plus dense, liseré d'action
+   épais, hachures. Les hachures reviennent sur le texte rédigé lui-même —
+   c'est le même signal aux deux endroits, et il veut dire « cette matière
+   n'est pas réelle ». */
+.bandeau--factice {
+  background:
+    repeating-linear-gradient(135deg, var(--accent-soft) 0 9px, transparent 9px 18px),
+    var(--verre-fort);
+  border: 1px solid var(--accent-border);
+  border-left: 3px solid var(--primary);
+  color: var(--texte-second);
+  -webkit-backdrop-filter: blur(var(--verre-flou)) saturate(140%);
+  backdrop-filter: blur(var(--verre-flou)) saturate(140%);
+}
+
+.bandeau--factice .bandeau__titre { color: var(--texte); }
+.bandeau--factice .bandeau__icone { color: var(--accent-texte); }
+
+.bandeau--factice .pourquoi-factice {
+  margin-top: 6px;
+  color: var(--texte-doux);
+  font-size: 0.86rem;
+}
+
+/* ══ Poser une question ═══════════════════════════════════════════════════ */
+
+.poser {
+  padding: 18px;
+  margin-bottom: 22px;
+}
+
+.poser__etiquette {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--texte-second);
+}
+
+.poser textarea {
+  display: block;
+  width: 100%;
+  min-height: 92px;
+  padding: 12px 14px;
+  resize: vertical;
+  color: var(--texte);
+  background: var(--verre-fort);
+  border: 1px solid var(--verre-bord-moyen);
+  border-radius: var(--rayon-petit);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: border-color 0.25s var(--courbe), box-shadow 0.25s var(--courbe);
+}
+
+.poser textarea::placeholder { color: var(--texte-faible); }
+
+.poser textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.poser__pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.compteur {
+  flex: 1 1 auto;
+  color: var(--texte-faible);
+  font-size: 0.82rem;
+}
+
+.compteur--plein { color: var(--accent-texte); }
+
+.bouton {
+  flex: 0 0 auto;
+  padding: 11px 20px;
+  color: var(--texte);
+  background: var(--grad-accent);
+  border: none;
+  border-radius: var(--rayon-petit);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s var(--courbe), box-shadow 0.3s var(--courbe);
+}
+
+.bouton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+.bouton:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.exemples {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--verre-bord);
+}
+
+.exemples__titre {
+  margin: 0 0 9px;
+  color: var(--texte-faible);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.exemples__liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.puce {
+  padding: 7px 12px;
+  color: var(--accent-texte);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.84rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.25s var(--courbe), background-color 0.25s var(--courbe);
+}
+
+.puce:hover {
+  background: var(--verre-fort);
+  border-color: var(--glass-border-hover);
+}
+
+.puce small {
+  display: block;
+  color: var(--texte-faible);
+  font-size: 0.74rem;
+}
+
+/* ══ La sortie ════════════════════════════════════════════════════════════ */
+
+.sortie { display: grid; gap: 16px; }
+
+.carte { padding: 18px; }
+
+.carte__titre {
+  margin: 0 0 8px;
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.carte p { margin: 0 0 8px; }
+.carte p:last-child { margin-bottom: 0; }
+
+.doux { color: var(--texte-doux); font-size: 0.9rem; }
+.faible { color: var(--texte-faible); font-size: 0.85rem; }
+
+/* L'état vide : ce que l'écran va montrer, dit avant qu'il le montre. */
+.vide__liste {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.vide__liste li {
+  padding-left: 14px;
+  border-left: 2px solid var(--accent-border);
+  color: var(--texte-doux);
+  font-size: 0.9rem;
+}
+
+.vide__liste strong { color: var(--texte-second); font-weight: 600; }
+
+/* L'attente. La première question peut être lente, et un Space froid met
+   quelques secondes à lire son index : une attente qui réessaie, jamais une
+   panne. */
+.attente {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pastille {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--accent-texte);
+  animation: battre 1.5s var(--courbe) infinite;
+}
+
+@keyframes battre {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.72); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pastille { animation: none; }
+  .bouton:hover:not(:disabled) { transform: none; }
+  * { transition-duration: 0.01ms !important; }
+}
+
+/* ══ Le verdict ═══════════════════════════════════════════════════════════ */
+
+.verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 15px 17px;
+  border-radius: var(--rayon);
+  border: 1px solid var(--verre-bord);
+}
+
+.verdict__icone { flex: 0 0 auto; width: 22px; height: 22px; margin-top: 1px; }
+.verdict__corps { min-width: 0; }
+
+.verdict__titre {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.verdict__dit {
+  margin: 5px 0 0;
+  color: var(--texte-second);
+  font-size: 0.92rem;
+}
+
+.verdict--repond {
+  background: var(--vert-soft);
+  border-color: var(--vert-border);
+}
+.verdict--repond .verdict__titre,
+.verdict--repond .verdict__icone { color: var(--vert); }
+
+.verdict--doute {
+  background: var(--rouge-soft);
+  border-color: var(--rouge-border);
+}
+.verdict--doute .verdict__titre,
+.verdict--doute .verdict__icone { color: var(--rouge); }
+
+/* Le rejet prend le registre d'ACTION — voir l'en-tête du fichier. */
+.verdict--rejet {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  border-left: 3px solid var(--primary);
+}
+.verdict--rejet .verdict__titre,
+.verdict--rejet .verdict__icone { color: var(--accent-texte); }
+
+.rappel-question {
+  margin: 0;
+  color: var(--texte-faible);
+  font-size: 0.85rem;
+}
+
+/* Les guillemets français, avec leur espace : le réglage par défaut du
+   navigateur colle « au mot. */
+.rappel-question q {
+  color: var(--texte-doux);
+  font-style: italic;
+  quotes: "\00ab\00a0" "\00a0\00bb";
+}
+
+/* ══ Le texte rédigé ══════════════════════════════════════════════════════ */
+
+.redige { padding: 18px; }
+
+/* Les hachures disent « matière non réelle », et elles ne sont posées QUE
+   sur le texte rédigé par un modèle factice. C'est la zone qu'on lit, et la
+   seule qui soit fausse : le bandeau du haut ne suffit pas, parce qu'on ne
+   relit pas le haut d'une page en lisant un paragraphe. */
+.redige--factice {
+  background:
+    repeating-linear-gradient(135deg, var(--accent-soft) 0 9px, transparent 9px 18px),
+    var(--verre);
+  border-style: dashed;
+  border-color: var(--accent-border);
+}
+
+.marque-factice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  color: var(--accent-texte);
+  background: var(--verre-fort);
+  border: 1px dashed var(--accent-border);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.redige__texte {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--texte);
+}
+
+.redige__note {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--verre-bord);
+  color: var(--texte-doux);
+  font-size: 0.85rem;
+}
+
+/* ══ Les citations — EN OR, et l'or n'est que là ══════════════════════════ */
+
+.citations {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--verre-bord);
+}
+
+.citations__titre {
+  margin: 0;
+  color: var(--texte-faible);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.citation {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 11px;
+  color: var(--or);
+  background: var(--or-soft);
+  border: 1px solid var(--or-border);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: background-color 0.25s var(--courbe);
+}
+
+.citation:hover { background: var(--verre-fort); }
+.citation .nb { font-size: 0.95rem; font-weight: 600; }
+
+/* ══ Les articles ═════════════════════════════════════════════════════════ */
+
+.articles__entete { padding: 15px 17px; }
+
+.articles__titre {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.articles__avis {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  color: var(--texte-second);
+}
+
+/* « Ce ne sont PAS la réponse » : la phrase la plus importante de l'écran
+   d'abstention, donc elle est écrite, pas suggérée par une nuance. */
+.articles__entete--candidats {
+  background: var(--rouge-soft);
+  border-color: var(--rouge-border);
+}
+.articles__entete--candidats .articles__titre { color: var(--rouge); }
+
+.article {
+  padding: 16px 17px;
+  transition: border-color 0.3s var(--courbe);
+}
+
+.article:hover { border-color: var(--glass-border-hover); }
+
+.article__tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+/* Le numéro d'article : OR, et le nombre en Azeret Mono. Le mot « article »
+   reste en DM Sans — c'est de la prose, et la charte réserve la mono aux
+   nombres. */
+.article__numero {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  color: var(--or);
+  font-size: 0.86rem;
+}
+
+.article__numero .nb {
+  font-size: 1.22rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.etiquette {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--verre-bord-moyen);
+  color: var(--texte-faible);
+}
+
+.etiquette--citee {
+  color: var(--or);
+  background: var(--or-soft);
+  border-color: var(--or-border);
+}
+
+/* La position hiérarchique. « Article 231 » seul ne veut rien dire ; livre,
+   titre, chapitre et section le situent, et en droit c'est une partie du
+   sens. C'est de la matière juridique : elle est donc en or, à la graduation
+   assombrie pour rester lisible en petit corps sur du verre. */
+.hierarchie {
+  margin: 0 0 11px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  border-left: 2px solid var(--or-border);
+  padding-left: 11px;
+}
+
+.hierarchie li {
+  color: var(--or-dim);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.hierarchie li:last-child { color: var(--or); }
+
+.article__texte {
+  margin: 0;
+  color: var(--texte-second);
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+/* Certains articles du Code font plus de 2 000 signes : cinq d'affilée à
+   375 px, c'est quinze écrans de défilement avant d'atteindre le suivant. Le
+   texte est REPLIÉ, jamais coupé — le bouton dit combien de signes restent,
+   et rien n'est retiré du document. */
+.article__texte--plie {
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.deplier {
+  margin-top: 8px;
+  padding: 5px 11px;
+  color: var(--accent-texte);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.25s var(--courbe);
+}
+
+.deplier:hover { border-color: var(--glass-border-hover); }
+
+.article__pied {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 11px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--verre-bord);
+  color: var(--texte-faible);
+  font-size: 0.8rem;
+}
+
+.article__pied span { display: inline-flex; align-items: baseline; gap: 4px; }
+
+/* ══ Mots inconnus, signalement, détail ══════════════════════════════════ */
+
+.inconnus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.mot-inconnu {
+  padding: 3px 10px;
+  color: var(--texte-second);
+  background: var(--verre-fort);
+  border: 1px dashed var(--verre-bord-moyen);
+  border-radius: 999px;
+  font-size: 0.84rem;
+}
+
+/* Le signalement d'injection : MONTRÉ, JAMAIS BLOQUANT. La réponse est rendue
+   dans le même objet, et cet encart explique ce qui a été repéré — fragment
+   exact compris, parce qu'une défense qui signale sans montrer n'est pas
+   contestable, donc pas améliorable. */
+.signalement {
+  padding: 16px 17px;
+  border-left: 3px solid var(--primary);
+}
+
+.signalement__titre {
+  margin: 0 0 6px;
+  color: var(--accent-texte);
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.familles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.famille {
+  padding: 3px 10px;
+  color: var(--accent-texte);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.traces { margin: 12px 0 0; display: grid; gap: 8px; }
+
+.trace {
+  padding: 10px 12px;
+  background: var(--verre-fort);
+  border: 1px solid var(--verre-bord);
+  border-radius: var(--rayon-petit);
+}
+
+.trace__extrait {
+  margin: 0;
+  color: var(--texte);
+  font-size: 0.9rem;
+}
+
+.trace__extrait::before,
+.trace__extrait::after { content: "\00ab\00a0"; color: var(--texte-faible); }
+.trace__extrait::after { content: "\00a0\00bb"; }
+
+.trace__meta { margin: 5px 0 0; color: var(--texte-faible); font-size: 0.78rem; }
+
+.technique { border-radius: var(--rayon); }
+
+.technique > summary {
+  padding: 13px 17px;
+  color: var(--texte-doux);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+}
+
+.technique > summary::-webkit-details-marker { display: none; }
+
+.technique > summary::before {
+  content: "+";
+  display: inline-block;
+  width: 1em;
+  color: var(--accent-texte);
+  font-weight: 700;
+}
+
+.technique[open] > summary::before { content: "\2212"; }
+
+.technique__corps {
+  padding: 0 17px 15px;
+  border-top: 1px solid var(--verre-bord);
+  padding-top: 13px;
+}
+
+.mesures {
+  display: grid;
+  gap: 9px;
+  margin: 0 0 12px;
+}
+
+.mesure {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--verre-bord);
+}
+
+.mesure:last-child { border-bottom: none; padding-bottom: 0; }
+
+.mesure__nom { color: var(--texte-faible); font-size: 0.84rem; }
+.mesure__valeur { color: var(--texte-second); font-size: 0.88rem; text-align: right; }
+.mesure__valeur .nb { color: var(--texte); font-weight: 600; }
+
+/* ══ Erreurs ══════════════════════════════════════════════════════════════ */
+
+.erreur {
+  padding: 17px;
+  background: var(--rouge-soft);
+  border: 1px solid var(--rouge-border);
+  border-radius: var(--rayon);
+}
+
+.erreur__titre {
+  margin: 0 0 4px;
+  color: var(--rouge);
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.erreur__code {
+  display: inline-block;
+  margin-bottom: 9px;
+  padding: 2px 9px;
+  color: var(--texte-doux);
+  background: var(--verre-fort);
+  border: 1px solid var(--verre-bord-moyen);
+  border-radius: 999px;
+  font-size: 0.76rem;
+}
+
+/* Le message du cœur arrive sur plusieurs lignes et dit quoi faire : il est
+   affiché tel quel, jamais résumé. */
+.erreur__message {
+  margin: 0;
+  color: var(--texte-second);
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.commande {
+  margin: 13px 0 0;
+  padding: 11px 13px;
+  overflow-x: auto;
+  color: var(--accent-texte);
+  background: var(--verre-fort);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--rayon-petit);
+  /* PAS Azeret Mono : la charte la réserve aux NOMBRES, et une ligne de
+     commande n'en est pas un. La fonte à chasse fixe du système dit « ceci se
+     tape dans un terminal » sans emprunter le rôle typographique des
+     chiffres. */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  white-space: pre;
+}
+
+.commande__titre {
+  margin: 0 0 6px;
+  color: var(--texte-faible);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ══ Pied de page ═════════════════════════════════════════════════════════ */
+
+.pied {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--verre-bord);
+  color: var(--texte-faible);
+  font-size: 0.84rem;
+}
+
+.pied h2 {
+  margin: 0 0 8px;
+  color: var(--texte-doux);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.pied p { margin: 0 0 9px; }
+.pied a { color: var(--accent-texte); }
+
+.pied__grille {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 46rem) {
+  .pied__grille { grid-template-columns: 1fr 1fr; }
+}
+
+.corpus-faits {
+  margin: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.corpus-faits div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.corpus-faits dt { color: var(--texte-faible); }
+.corpus-faits dd { margin: 0; color: var(--texte-doux); }
+
+/* ══ 375 px — éprouvé, pas supposé ════════════════════════════════════════
+   Ce que la largeur étroite casse en premier : le bouton d'envoi qui pousse
+   le compteur hors de la ligne, les titres à 1,6 rem, et les puces
+   d'exemples. ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 30rem) {
+  .page { padding-top: 20px; }
+
+  .entete__logo { width: 38px; height: 38px; }
+  .entete__titre { font-size: 1.35rem; }
+  .entete__sous { font-size: 0.86rem; }
+
+  /* Les deux bandeaux restent EN HAUT et entiers — c'est une règle de la
+     charte, pas une préférence de mise en page. Ce qui se resserre à 375 px,
+     c'est leur interligne, pas leur contenu : le texte de `redaction.pourquoi`
+     est affiché tel quel à toutes les largeurs. */
+  .bandeau { padding: 12px 13px; font-size: 0.85rem; line-height: 1.5; }
+  .bandeau__titre { font-size: 0.88rem; }
+  .bandeau--factice .pourquoi-factice { font-size: 0.8rem; }
+  .promesse { font-size: 0.9rem; }
+
+  .poser { padding: 15px; }
+
+  /* Le bouton prend toute la largeur ; le compteur passe au-dessus, parce
+     qu'un compteur placé SOUS le bouton d'envoi se lit après l'action qu'il
+     devait informer. */
+  .poser__pied { flex-direction: column; align-items: stretch; }
+  .bouton { width: 100%; }
+  .compteur { text-align: right; }
+
+  .puce { width: 100%; }
+
+  .carte,
+  .article,
+  .signalement,
+  .articles__entete,
+  .redige { padding: 15px; }
+
+  .verdict { padding: 14px; }
+  .verdict__titre { font-size: 1rem; }
+
+  .mesure { flex-direction: column; align-items: flex-start; }
+  .mesure__valeur { text-align: left; }
+
+  /* Le libellé passe sur sa propre ligne : collé à la première pastille, il
+     rejetait la seconde à la ligne suivante toute seule. */
+  .citations { gap: 7px; }
+  .citations__titre { flex: 1 0 100%; }
+}

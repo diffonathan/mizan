@@ -76,7 +76,7 @@ class BrasDense(Protocol):
 
     Il existe pour que le moteur soit testable sans 1,2 Go de modèle : les
     tests injectent un bras déterministe, et vérifient l'architecture — la
-    profondeur dense, la queue lexicale, le seuil de marge — sans dépendre de
+    profondeur dense, la queue lexicale, le seuil de proximité — sans dépendre de
     ce qui ne tourne que sur une machine où l'index a été construit. Un projet
     dont les tests ne tournent que chez son auteur n'est pas un projet.
     """

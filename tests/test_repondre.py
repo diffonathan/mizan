@@ -86,16 +86,17 @@ class ChercheurFactice:
             articles=articles,
             sur=self.sur,
             pourquoi=(
-                "L'article premier se détache du suivant (marge de 17,1 %, "
-                "pour un seuil de 4,0 %)."
+                "L'article premier ressemble d'assez près à la question "
+                "(proximité de 0,62, pour un seuil de 0,46)."
                 if self.sur
                 else "Les premiers articles trouvés se valent de trop près "
                 "(marge de 1,2 %, pour un seuil de 4,0 %) : rien ne désigne "
                 "l'article premier comme la réponse."
             ),
             avertissement=AVERTISSEMENT,
+            proximite=0.62 if self.sur else 0.41,
+            seuil_proximite=0.46,
             marge=0.171 if self.sur else 0.012,
-            seuil_marge=0.04,
         )
 
 
@@ -616,10 +617,19 @@ class BoutEnBout(unittest.TestCase):
         self.assertEqual(reponse.cause, module_garde.CITATION_INVENTEE)
 
     def test_une_question_hors_du_code_n_atteint_pas_le_redacteur(self):
+        """Le silence de la récupération coupe la chaîne avant la rédaction.
+
+        La question a changé avec le signal d'abstention : « combien coûte un
+        avocat spécialisé en droit du travail au Maroc ? » est un cas
+        LIMITROPHE — du droit du travail, mais pas du Code — que la proximité
+        ne refuse pas (0,4887 pour un seuil de 0,46). Cette limite est épinglée
+        là où elle se mesure, dans
+        `test_noyau.Fidelite.test_une_question_limitrophe_reste_servie_et_c_est_la_limite_connue`.
+        Ce test-ci vérifie le CHEMIN, et il a besoin d'une question dont le
+        silence est acquis.
+        """
         mizan, redacteur = self._mizan("fidele")
-        reponse = mizan.repondre(
-            "Combien coûte un avocat spécialisé en droit du travail au Maroc ?"
-        )
+        reponse = mizan.repondre("Quelle est la recette du couscous ?")
         self.assertTrue(reponse.abstenu)
         self.assertEqual(redacteur.appels, [])
         self.assertEqual(reponse.cause, module_repondre.SILENCE_RECUPERATION)

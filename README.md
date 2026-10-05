@@ -1,3 +1,23 @@
+---
+title: Mizan
+emoji: ⚖️
+colorFrom: purple
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: other
+---
+
+<!-- L'entête ci-dessus n'est pas décoratif : Hugging Face y lit le SDK et le
+     port du Space, et sans lui la construction ne part pas. Le prix, assumé,
+     est que GitHub l'affiche comme un tableau en haut de cette page — c'est la
+     deuxième des trois sorties pesées au §2 de DEPLOIEMENT.md, et celle-ci est
+     désormais celle qui est en place. Les couleurs reprennent la charte :
+     `purple` est le nom Hugging Face le plus proche du violet profond #7c3aed
+     (CHARTE.md), `indigo` ferme le dégradé vers le sombre. Hugging Face
+     n'accepte que huit noms de couleur, pas un code hexadécimal. -->
+
 <p align="center">
   <img src="brand/logo.svg" alt="Mizan" width="96">
 </p>
@@ -154,7 +174,7 @@ Le détail, les commandes et ce que chaque chiffre ne dit pas sont dans
 |---|---|---|---|
 | témoin lexical seul (BM25) | 30,7 % | 46,5 % | 50,9 % |
 | **l'architecture, qui répond à tout** | **61,1 %** | **84,5 %** | **91,5 %** |
-| l'architecture **au point de fonctionnement** (seuil d'abstention) | 50,0 % | 58,8 % | 60,5 % |
+| l'architecture **au point de fonctionnement** (seuil d'abstention) | **61,1 %** | **84,5 %** | **89,8 %** |
 
 Une ligne du tableau, une commande, dans le même ordre :
 
@@ -173,72 +193,126 @@ lecteur qui clone qui en paierait la différence. Autant le dire ici que laisser
 deux recettes se contredire d'un document à l'autre.
 
 Les deux dernières lignes ne se lisent jamais l'une sans l'autre, parce que le
-banc compte une abstention comme un rappel nul. Au point de fonctionnement :
-**85,7 % d'abstention correcte** sur les 7 questions dont la réponse n'est pas
-dans le Code, payées par **36,8 % de dérobade** — des silences sur des questions
-auxquelles le Code répondait.
+banc compte une abstention comme un rappel nul. Au point de fonctionnement, le
+système se tait correctement sur **27 des 36 questions hors corpus**, et il le
+paie par **3,5 % de dérobade** — 2 silences sur les 57 questions auxquelles le
+Code répond, qui sont les deux injections du jeu.
 
-Le seuil qui donne ce point de fonctionnement a été **lu sur ces mêmes 64
-questions**, et il n'y a pas d'échantillon de validation : les 85,7 % sont donc
-un chiffre d'apprentissage, pas de généralisation, et la valeur par défaut du
-seuil reste à recalibrer sur des questions que personne n'a vues.
+**Ces deux silences ont été présentés ici comme une sécurité ; ils ne le sont
+qu'à moitié.** Il est vrai que la prose de détournement dilue le plongement,
+que la proximité passe sous le seuil et que le modèle n'est donc jamais appelé
+sur ces deux questions. Mais **la propriété tient sur les questions accentuées
+et ne tient plus sans accents** : l'injection Q60 — celle qui se déguise en
+consigne de protocole — franchit le seuil dès que la même question est tapée
+sans accents (0,4581 accentuée, refusée ; 0,4663 sans accents, servie, pour un
+seuil de 0,46). Et *laquelle* des deux est refusée change avec l'écriture, ce
+qui est pire qu'un seuil mal placé : Q63 reste sous le seuil dans les deux
+écritures, Q60 le franchit dans l'une des deux. Une version précédente de cette
+page nommait Q63 ; c'était vrai avant que la re-accentuation ne soit posée, et
+faux après — les deux commandes ci-dessous le rejouent. Ce
+n'est pas une défense, c'est un effet de bord. La défense, elle, ne dépend
+d'aucun seuil dense : la détection rend le même score sur les cinq injections
+accentuées et dépouillées, et la garde ne regarde pas la question du tout. Les
+deux commandes qui montrent le basculement, et l'étendue du phénomène sur le
+jeu entier dès qu'une commande l'imprimera, sont dans
+[`MESURES.md`](MESURES.md) §A.3, qui en est la source unique.
 
-**Savoir se taire est le problème ouvert de ce produit**, et il est traité comme
-tel, pas comme un détail.
+**Vingt-sept sur trente-six n'est pas une garantie**, et l'effectif s'écrit à
+côté du chiffre pour cette raison. Le seuil a été lu sur 18 questions étrangères
+et rapporté sur 18 autres qui n'ont pas servi à le choisir : 14 sur 18 d'un
+côté, 13 sur 18 de l'autre. C'est 2,6 fois mieux que les sept cas du chiffre
+qu'il remplace — « 85,7 % », longtemps publié ici comme une propriété du
+produit, valait six réussites sur sept — et cela reste un point de
+fonctionnement mesuré, pas une valeur établie.
+
+**Ce que ce point de fonctionnement ne résout pas** : les 9 questions hors
+corpus encore servies sont celles qui *frôlent* le Code sans y être — le prix
+d'un avocat spécialisé, l'encadrement du télétravail, la durée d'une pension
+alimentaire. Les questions franchement étrangères, elles, sont toutes refusées
+(6 sur 6).
+
+Le jeu hors corpus compte 36 questions, réparties en cinq façons d'être hors du
+Code et coupées en deux moitiés — une pour régler, une qui ne sert qu'à
+vérifier. Le banc imprime ces effectifs à chaque passe, et c'est là qu'il faut
+les lire plutôt qu'ici :
+
+```sh
+python evaluation/banc.py
+# → 93 questions, dont 57 avec réponse et 36 sans réponse dans le Code
+# → abstention correcte, par façon d'être hors corpus et de part et d'autre
+#   de la coupe, chaque taux suivi de son effectif
+```
+
+La règle que ce chiffre a lui-même fait écrire tient en une phrase : **dire sur
+combien de cas une proportion est calculée, à l'endroit où elle est écrite.**
+[`MESURES.md`](MESURES.md) §A.3 est la source unique pour cette grandeur et la
+donne avec ses effectifs ; elle n'est pas recopiée ici autrement.
+
+**Savoir se taire reste le chantier de ce produit** — les questions qui frôlent
+le Code sans y être ne sont pas attrapées — mais ce n'est plus un trou : c'est
+une limite mesurée, publiée avec son effectif et épinglée par un test nommé.
 
 ### Arrêter les inventions — le chiffre le plus intéressant du projet
-
-Avec un modèle factice adverse, sur 37 rédactions :
-
-| | |
-|---|---|
-| rédactions citant un article **non récupéré** | 17 — 45,9 % |
-| rédactions sans aucune citation | 6 |
-| **taux de rejet par la garde** | **62,2 %** |
-| **inventions arrivées sur l'écran de l'usager** | **0** |
-| rejets à tort (rédaction loyale refusée) | **0** |
-| réponses servies sans avertissement de date | **0** |
 
 ```sh
 prototypes/vectoriel/.venv/Scripts/python.exe evaluation/banc_bout_en_bout.py --recuperation reel
 ```
 
-Le banc imprime son propre contrôle sous son tableau du rejet :
-*hallucinations fabriquées 17, mesurées 17 — CONCORDENT*. Les valeurs du
-tableau sont celles de `--recuperation reel`, et
-[`MESURES.md`](MESURES.md) §D.1 en est la source.
+Un modèle factice adverse écrit **64 rédactions** et y glisse **31 citations
+d'articles non récupérés**. La garde les arrête **toutes les 31** — et ce n'est
+pas la chaîne qui s'auto-déclare satisfaite : le banc connaît les fautes qu'il
+a fabriquées et les compare à celles qu'il a mesurées, puis imprime sous son
+tableau du rejet *hallucinations fabriquées 31, mesurées 31 — CONCORDENT*.
 
-`--recuperation idf` — la variante sans paquet ni index du bloc « Lancer le
-projet » — donne une **autre série, également juste** : 33 rédactions, 51,5 %
-d'invention, 69,7 % de rejet, parce que le bras dense y est remplacé par un
-plancher idf. Les deux séries ne se mélangent pas et ne se réconcilient pas :
-un lecteur qui lance la commande sans paquet et retrouve d'autres chiffres n'a
-pas pris cette page en faute, il a mesuré autre chose.
+Trois compteurs qu'une seule violation suffirait à faire tomber, et que la même
+commande imprime sous le titre INVARIANTS :
+
+| | |
+|---|---|
+| **inventions arrivées sur l'écran de l'usager** | **0** |
+| rejets à tort (rédaction loyale refusée) | **0** |
+| réponses servies sans avertissement de date | **0** |
+
+Le reste de la série — précision des citations, part d'invention, taux de rejet,
+dérobade, et les trois colonnes de modèle factice — est dans
+[`MESURES.md`](MESURES.md) §D.1, **qui en est la source unique**. Cette page
+n'en recopie pas le tableau, et c'est volontaire : la série publiée ici
+jusqu'à présent était celle d'un jeu d'évaluation de 64 questions, périmée
+depuis son élargissement à 93, et une valeur qui vit dans deux documents finit
+toujours par y prendre deux âges.
 
 La plupart des démonstrations de RAG ne publient pas ce chiffre, parce qu'il
 demande de savoir **combien de fois le modèle a inventé** — ce qui exige soit de
 relire chaque réponse à la main, soit, comme ici, un modèle dont on connaît les
 fautes d'avance et qui permet au banc de **vérifier qu'il les retrouve toutes**
-(17 fabriquées, 17 mesurées).
+(31 fabriquées, 31 mesurées).
 
-Il faut le citer avec sa contrepartie : **la garde coûte des réponses.** Elle
-fait passer la dérobade de 36,8 % à 75,4 %, soit **22 questions répondables
-perdues contre un seul refus souhaitable gagné**. Les deux taux viennent de
-deux commandes distinctes et ne se lisent pas dans la même sortie : 36,8 % est
-la dérobade de la **récupération seule** (troisième commande du tableau
-précédent), 75,4 % celle de la **chaîne entière**, garde comprise (la commande
-ci-dessus).
+`--recuperation idf` — la variante sans paquet ni index du bloc « Lancer le
+projet » — donne une **autre série, également juste** : 91 rédactions au lieu
+de 64, parce que le bras dense y est remplacé par un plancher idf, et un
+plancher ne doute pas aux mêmes endroits. [`MESURES.md`](MESURES.md) §D.2 la
+publie en entier. Les deux séries ne se mélangent pas et ne se réconcilient
+pas : un lecteur qui lance la commande sans paquet et retrouve d'autres
+chiffres n'a pas pris cette page en faute, il a mesuré autre chose.
 
-Le prix de la garantie est payé par l'usager qui n'obtient pas de réponse — et
-c'est le bon arbitrage pour un assistant juridique, pas pour tous les
-produits.
+Il faut le citer avec sa contrepartie : **la garde coûte des réponses.** Sur les
+57 questions auxquelles le Code répond, la récupération seule se tait 2 fois —
+les **3,5 %** de dérobade du point de fonctionnement, plus haut. La chaîne
+entière, garde comprise, se tait sur **64,9 %** d'entre elles : c'est le prix de
+la garantie, et il est payé par l'usager qui n'obtient pas de réponse. Les deux
+taux sortent de deux commandes distinctes et ne se lisent jamais dans la même
+sortie — 3,5 % vient du banc de récupération, 64,9 % de la commande ci-dessus ;
+[`MESURES.md`](MESURES.md) §D.1 les met côte à côte avec ce qu'ils achètent en
+abstention correcte.
+
+C'est le bon arbitrage pour un assistant juridique, pas pour tous les produits.
 
 ### Résister à une consigne injectée
 
 | | |
 |---|---|
 | détection des 5 injections du jeu | 5 / 5 |
-| faux positifs sur les 59 autres questions du jeu | 0 / 59 |
+| faux positifs sur les 88 autres questions du jeu | 0 / 88 |
 | faux positifs sur les 32 leurres écrits pour piéger la couche | 0 / 32 |
 | coût de la détection | un parcours d'expressions régulières contre une inférence de plongement — le rapport, la milliseconde et sa commande sont au §3.4 de [`SECURITE.md`](SECURITE.md), qui en est la source |
 | numéros d'article que l'inclusion rejette, sur chaque injection | 584 / 589 — 99,2 % du Code |
@@ -248,7 +322,8 @@ python -m moteur.mesurer_injection
 prototypes/vectoriel/.venv/Scripts/python.exe -m moteur.mesurer_injection --garde
 ```
 
-La première imprime les trois premières lignes du tableau ; la seconde, qui
+Les 88 sont les 93 questions du jeu moins les 5 injections. La première
+commande imprime les trois premières lignes du tableau ; la seconde, qui
 demande l'index dense, imprime le 584 / 589 — sans index, le programme le dit
 au lieu de l'inventer. Ce document ne recopie plus la milliseconde du coût :
 relancée aujourd'hui, `--cout` ne rend pas la médiane qui était publiée ici,
@@ -332,12 +407,13 @@ qualifie pas une situation, n'évalue pas un litige et ne remplace personne.
 
 Aucune clé de modèle de langue n'existe dans l'environnement où ce projet est
 écrit. **Tous les chiffres de rédaction ci-dessus sont produits avec un modèle
-factice déterministe**, et chaque ligne du banc porte ce drapeau. Les 45,9 %
-d'invention sont *fabriqués par le banc*, pas observés : un vrai modèle
-inventerait moins, et le taux de rejet serait à remesurer avec.
+factice déterministe**, et chaque ligne du banc porte ce drapeau. La part
+d'invention publiée au §D.1 de [`MESURES.md`](MESURES.md) est *fabriquée par le
+banc*, pas observée : un vrai modèle inventerait moins, et le taux de rejet
+serait à remesurer avec.
 
 Ce qui est mesuré, et il faut le dire avec ses bornes : **la chaîne a rejeté
-les 17 inventions sur 17 que le banc lui a envoyées, dans les formes de citation
+les 31 inventions sur 31 que le banc lui a envoyées, dans les formes de citation
 que l'extracteur reconnaît** — et c'est le banc lui-même qui compare ce qu'il a
 fabriqué à ce qu'il a mesuré, sur la commande du tableau « Arrêter les
 inventions ». La réserve n'est pas rhétorique : le modèle factice
@@ -464,7 +540,7 @@ tout de suite sur une clé absente ou un index manquant, au lieu de le découvri
 | client de modèle | `urllib.request` — un POST JSON, aucune dépendance de fournisseur |
 | tests | `unittest`, aucun paquet requis — le compte s'imprime, voir « Les tests » |
 | corpus | `corpus/code-travail.json` — 589 articles extraits et contrôlés |
-| évaluation | 64 questions, 8 étiquettes, deux bancs — le recensement fait foi dans [`evaluation/METHODE.md`](evaluation/METHODE.md) §1 |
+| évaluation | **93 questions** — 57 avec réponse, 36 sans — 8 étiquettes, deux bancs ; `python evaluation/banc.py` imprime ces effectifs, et le recensement fait foi dans [`evaluation/METHODE.md`](evaluation/METHODE.md) §1 |
 
 Les paquets ne sont nécessaires **que** pour le bras dense. La garde, la
 composition, la détection d'injection, le contrat de réponse et la totalité des
@@ -501,10 +577,14 @@ bancs de mesure. La suite, dans cet ordre :
    sans montrer est indiscutable, donc inaméliorable.
 2. **Remesurer la section D de `MESURES.md` avec un vrai modèle.** Le levier de
    rappel qui reste est la rédaction, pas le seuil d'abstention.
-3. **Recalibrer le seuil de marge sur un jeu de validation.** 0,04 est lu sur
-   les 64 questions qui servent aussi à le juger ; tant qu'aucune question
-   inédite ne l'a éprouvé, c'est un point de fonctionnement mesuré et non une
-   valeur établie.
+3. **Attraper les questions qui frôlent le Code.** Le seuil d'abstention a
+   été refait sur la coupe du jeu élargi et les questions franchement
+   étrangères sont réglées, mais 9 des 36 restent servies : prix d'un avocat
+   spécialisé, encadrement du télétravail, pension alimentaire. Aucun des sept
+   signaux éprouvés par `arbitrage/abstention.py` ne les attrape sans détruire
+   le rappel. Et le seuil retenu est un cosinus propre au modèle de plongement :
+   **en changer invalide la valeur**, là où la marge qu'il remplace, étant un
+   écart entre deux rangs, y survivait.
 4. **Élargir le corpus** — décrets d'application, puis conventions. C'est la
    seule façon d'élargir ce que la garde autorise. Attention : le modèle de
    menace de `SECURITE.md` suppose un corpus **figé dans le dépôt**. Le jour où

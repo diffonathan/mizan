@@ -1,0 +1,121 @@
+# ══ Ce qui entre dans l'image, et rien d'autre ═════════════════════════════
+#
+# LA STRATÉGIE EST L'INVERSE DE L'HABITUELLE, ET C'EST DÉLIBÉRÉ
+#
+# Un `.dockerignore` ordinaire énumère ce qu'il refuse. Ici tout est refusé
+# d'abord (`*`), puis réautorisé nom par nom. La raison est mesurée : ce dépôt
+# contient 4,1 Go de caches de modèles sous `prototypes/` et un
+# environnement virtuel complet. Une liste de refus doit être tenue à jour à
+# chaque nouveau dossier, et le jour où elle l'oublie, l'oubli ne se signale
+# pas — il se paie en gigaoctets envoyés au démon Docker, puis en une image
+# qu'un Space gratuit ne construit plus.
+#
+# Avec l'énumération explicite, un dossier nouveau est absent par défaut. Le
+# mode de panne devient « il manque un fichier », qui se voit immédiatement
+# au contrôle de construction de la couche ❺ du Dockerfile, au lieu de
+# « l'image fait 5 Go », qui se voit trop tard.
+
+# Tout est exclu.
+*
+
+# ── Le chemin de la réponse ────────────────────────────────────────────────
+!noyau
+!moteur
+
+# ── Le service web et son interface ────────────────────────────────────────
+# Convention arrêtée avec l'agent qui l'écrit : FastAPI dans `service/app.py`,
+# objet `app`, statique dans `service/statique/`.
+!service
+
+# ── Les données ────────────────────────────────────────────────────────────
+# Seul le corpus extrait entre. Le PDF source (1,5 Mo) et `extraire.py`
+# restent dehors : ils servent la reproductibilité de l'extraction, qui n'a
+# pas lieu en production. On réautorise le dossier, on réexclut son contenu,
+# on réautorise le seul fichier voulu — l'idiome fiable pour viser un fichier
+# dans un dossier par ailleurs refusé.
+!corpus
+corpus/*
+!corpus/code-travail.json
+
+# ── L'INDEX VECTORIEL ──────────────────────────────────────────────────────
+# 1,8 Mo, versionné, scellé sur le corpus par son empreinte. C'est la ligne
+# qui évite 1 075 s d'indexation et un pic de 9,4 Go à chaque redémarrage du
+# Space, dont le disque n'est pas persistant.
+#
+# Si cette ligne disparaît, la construction ÉCHOUE au contrôle de la couche ❺
+# du Dockerfile, sur un `IndexAbsent`. Elle ne produit pas un Space qui
+# démarre et répond de travers : c'est tout l'intérêt d'avoir mis ce contrôle
+# dans la construction.
+!.cache_vecteurs
+.cache_vecteurs/*
+!.cache_vecteurs/dense-google_embeddinggemma-300m.npz
+
+# ── Le nécessaire au démarrage ─────────────────────────────────────────────
+# `sortie.py` est importé par les points d'entrée pour son effet sur les flux
+# (encodage de la sortie standard) ; son absence casse l'affichage des
+# accents dans les journaux du Space, ce qui est exactement là où on les lit.
+!requirements.txt
+!sortie.py
+
+# ── La charte ──────────────────────────────────────────────────────────────
+# Les logos sont servis par l'interface. `brand/README.md` suit : il est
+# minuscule et c'est lui qui dit comment le logo doit être employé.
+!brand
+
+# ── Les tests ──────────────────────────────────────────────────────────────
+# Gardés exprès, pour une raison d'exploitation : quand un Space se comporte
+# autrement qu'en local, pouvoir lancer la suite DANS le conteneur
+# (`python -m unittest discover -s tests -t tests -q`) distingue en une minute
+# un problème d'environnement d'un problème de code. Ils pèsent quelques
+# centaines de kilooctets, et `tests/test_index_scelle.py` vérifie sur place
+# que l'index embarqué colle bien au corpus embarqué.
+!tests
+
+# ══ Ce qui reste dehors, et pourquoi ═══════════════════════════════════════
+#
+# Les lignes ci-dessous sont REDONDANTES avec le `*` du début : rien ne les
+# réautorise. Elles sont écrites quand même, parce qu'un lecteur qui se
+# demande « où sont passés les 4 Go ? » doit trouver la réponse dans ce
+# fichier, et parce qu'elles protègent contre un `!` trop large ajouté plus
+# tard sans y penser.
+#
+#   prototypes/   4,1 Go de caches de modèles et un .venv — les essais de
+#                 sélection du modèle de plongement, gardés pour la traçabilité
+#                 du dossier, inutiles à l'exécution.
+#   arbitrage/    les résultats de mesure (res_*.json) et vecteurs_froid.npy.
+#                 Ce sont des SOURCES de chiffres publiés, pas du code servi.
+#   evaluation/   les deux bancs et leurs 64 questions : de la mesure, pas du
+#                 service.
+#   .git/         l'historique. Volumineux, et l'image n'en fait rien.
+#
+# Ces quatre-là sont nommés explicitement pour que même un `!*` accidentel ne
+# les fasse pas entrer.
+prototypes
+arbitrage
+evaluation
+.git
+.gitignore
+.gitattributes
+
+# Caches et environnements, où qu'ils se trouvent dans les dossiers
+# réautorisés ci-dessus. `__pycache__` d'un hôte Windows embarqué dans une
+# image Linux n'est au mieux qu'un poids mort.
+**/__pycache__
+**/*.py[cod]
+**/.venv
+**/.cache_modeles
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+
+# Secrets. La clé du modèle est un SECRET DU SPACE, posé dans l'interface de
+# Hugging Face, jamais un fichier. Ces lignes sont une ceinture : un `.env`
+# oublié sur le poste de travail ne doit pas pouvoir partir dans une image
+# publique.
+**/.env
+**/.env.*
+
+# Les documents du dossier. Ils font le projet sur GitHub et ne servent pas
+# l'exécution ; `DEPLOIEMENT.md` lui-même reste dehors.
+*.md
+!brand/README.md

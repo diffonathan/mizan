@@ -91,6 +91,13 @@ def principal() -> int:
 
     corpus = banc.charger_corpus()
     jeu = banc.charger_questions()
+    # L'effectif du jeu est COMPTÉ, jamais écrit : ce fichier a longtemps
+    # imprimé « 64 questions » dans son titre et dans ses deux médianes, bien
+    # après l'élargissement du jeu. Une sortie de mesure qui annonce le mauvais
+    # effectif est plus nuisible qu'un document qui le fait, parce que c'est
+    # elle qui sert de preuve quand on vérifie le document.
+    questions = jeu["questions"]
+    n = len(questions)
     courant, pic = memoire_mo()
     jalons["corpus et jeu chargés"] = (courant, pic)
 
@@ -109,12 +116,12 @@ def principal() -> int:
     ms_premiere = (time.perf_counter() - depart) * 1000
 
     durees = []
-    for q in jeu["questions"]:
+    for q in questions:
         depart = time.perf_counter()
         recuperer(q["question"], 5)
         durees.append((time.perf_counter() - depart) * 1000)
     courant, pic = memoire_mo()
-    jalons["64 questions servies"] = (courant, pic)
+    jalons[f"{n} questions servies"] = (courant, pic)
 
     # Les millisecondes par question se partagent entre deux termes qui ne
     # vieilliront pas du tout de la même façon : le plongement de la question,
@@ -140,7 +147,7 @@ def principal() -> int:
                     chercheur.prefixe_requete + q["question"]))[0]
             ).astype(np.float32)
         )
-        for q in jeu["questions"]
+        for q in questions
     ]
     scalaire = []
     for v in vecteurs_questions:
@@ -148,12 +155,17 @@ def principal() -> int:
         matrice @ v
         scalaire.append((time.perf_counter() - depart) * 1000)
 
+    # Les deux étiquettes qui portent l'effectif sont construites ici, une
+    # seule fois : deux f-strings séparées pourraient dériver l'une de l'autre.
+    etiquette_mediane = f"par question, médiane sur {n}"
+    etiquette_scalaire = f"produit scalaire seul, médiane sur {n}"
+
     print()
-    print("  COÛT EN SERVICE — processus neuf, index relu, 64 questions")
+    print(f"  COÛT EN SERVICE — processus neuf, index relu, {n} questions")
     print("  " + "-" * 72)
     print(f"  {'démarrage (chargement du modèle + index)':50}{secondes_demarrage:8.2f} s")
     print(f"  {'première question (ouverture session ONNX comprise)':50}{ms_premiere:8.1f} ms")
-    print(f"  {'par question, médiane sur 64':50}{statistics.median(durees):8.2f} ms")
+    print(f"  {etiquette_mediane:50}{statistics.median(durees):8.2f} ms")
     print(f"  {'par question, 95e centile':50}"
           f"{sorted(durees)[int(0.95 * len(durees))]:8.2f} ms")
     print(f"  {'par question, maximum':50}{max(durees):8.2f} ms")
@@ -163,7 +175,7 @@ def principal() -> int:
     print(f"  {'matrice parcourue à chaque question':50}"
           f"{matrice.shape[0]:5} × {matrice.shape[1]} flottants")
     print(f"  {'soit, en mémoire':50}{matrice.nbytes:10} octets")
-    print(f"  {'produit scalaire seul, médiane sur 64':50}"
+    print(f"  {etiquette_scalaire:50}"
           f"{statistics.median(scalaire):8.3f} ms")
     print(f"  {'produit scalaire seul, maximum':50}{max(scalaire):8.3f} ms")
     print(f"  {'part du produit scalaire dans la médiane':50}"
@@ -206,6 +218,7 @@ def principal() -> int:
 
     (Path(__file__).resolve().parent / "res_cout.json").write_text(
         json.dumps({
+            "questions_mesurees": n,
             "secondes_demarrage": round(secondes_demarrage, 2),
             "ms_premiere_question": round(ms_premiere, 1),
             "ms_mediane": round(statistics.median(durees), 2),

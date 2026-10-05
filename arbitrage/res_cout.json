@@ -1,11 +1,12 @@
 {
-  "secondes_demarrage": 2.1,
-  "ms_premiere_question": 42.1,
-  "ms_mediane": 23.23,
-  "ms_p95": 27.98,
-  "ms_max": 31.74,
-  "ms_produit_scalaire_mediane": 0.037,
-  "ms_produit_scalaire_max": 0.171,
+  "questions_mesurees": 93,
+  "secondes_demarrage": 21.29,
+  "ms_premiere_question": 816.7,
+  "ms_mediane": 867.4,
+  "ms_p95": 1184.96,
+  "ms_max": 1471.86,
+  "ms_produit_scalaire_mediane": 0.186,
+  "ms_produit_scalaire_max": 7.585,
   "octets_matrice": 1806336,
   "forme_matrice": [
     588,
@@ -13,24 +14,24 @@
   ],
   "memoire": {
     "processus neuf": [
-      18.2,
+      17.9,
       18.7
     ],
     "corpus et jeu chargés": [
-      19.9,
-      22.6
+      19.6,
+      22.3
     ],
     "index prêt (cache relu)": [
-      585.3,
-      867.7
+      584.2,
+      867.2
     ],
-    "64 questions servies": [
-      594.2,
-      867.7
+    "93 questions servies": [
+      593.6,
+      867.2
     ]
   },
   "disque_mo": {
-    "paquets Python (site-packages du .venv)": 161.3,
+    "paquets Python (site-packages du .venv)": 173.6,
     "modèle embeddinggemma-300m (ONNX)": 1198.3,
     "index vectoriel sérialisé (.npy)": 1.7,
     "corpus JSON": 0.9,

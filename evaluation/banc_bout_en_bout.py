@@ -654,13 +654,14 @@ class BrasDenseIdf:
         return list(self._plancher(question, profondeur))
 
 
-def construire_moteur(mode: str, seuil_marge: float | None):
+def construire_moteur(mode: str, seuil_proximite: float | None):
     """Rend (moteur, étiquette de mode). Deux modes, nommés dans la sortie."""
     from noyau import corpus as module_corpus
     from noyau import recherche as module_recherche
 
     corpus = module_corpus.charger()
-    seuil = module_recherche.SEUIL_MARGE if seuil_marge is None else seuil_marge
+    seuil = (module_recherche.SEUIL_PROXIMITE if seuil_proximite is None
+             else seuil_proximite)
 
     if mode == "idf":
         bras = BrasDenseIdf(corpus.articles)
@@ -1115,13 +1116,14 @@ def ecrire_rapport(res: Resultats, detail: bool = False) -> None:
     print(f"  RÉCUPÉRATION  {modes['recuperation']}")
     print(f"  RÉPONDEUR     {modes['repondeur']}")
     if modes.get("moteur_remis", True):
-        print(f"  seuil de marge {_virgule(modes['seuil_marge'], 2)}, k = {modes['k']}")
+        print("  seuil de proximité "
+              f"{_virgule(modes['seuil_proximite'], 2)}, k = {modes['k']}")
     else:
         # Un répondeur qui n'a pas pris le moteur du banc construit le sien :
         # annoncer le seuil du banc serait annoncer un réglage qui ne s'applique
         # pas, c'est-à-dire exactement le genre de chiffre faux que ce fichier
         # refuse d'imprimer.
-        print("  seuil de marge et k : inconnus du banc — ce répondeur a "
+        print("  seuil d'abstention et k : inconnus du banc — ce répondeur a "
               "construit son propre moteur")
     if not modes["observe"]:
         print("  MESURE EN AVEUGLE : le répondeur ne prend pas le modèle du banc.")
@@ -1202,7 +1204,7 @@ def ecrire_rapport(res: Resultats, detail: bool = False) -> None:
     print(f"  {'silences décidés par la garde':48}"
           f"{len(res.abstentions_par_la_garde()):3d}")
     print("  Les deux ne se corrigent pas de la même façon : le premier est un seuil")
-    print("  de marge, le second une rédaction refusée.")
+    print("  d'abstention, le second une rédaction refusée.")
     print()
 
     # -- par catégorie -----------------------------------------------------
@@ -1326,8 +1328,14 @@ def principal(argv: Sequence[str] | None = None) -> int:
     analyseur.add_argument("--recuperation", default="reel",
                            help="reel (index dense) | idf (factice, sans paquet) "
                                 "(défaut : reel)")
-    analyseur.add_argument("--seuil-marge", type=float, default=None,
-                           help="remplace le seuil d'abstention du noyau")
+    # Renommée avec le signal : le noyau décide sur la proximité (le score
+    # dense absolu du 1er article) depuis `arbitrage/abstention.py`. Garder
+    # « --seuil-marge » aurait laissé croire qu'on règle encore un écart entre
+    # rangs, et les chiffres de ce banc seraient lus pour autre chose que ce
+    # qu'ils mesurent.
+    analyseur.add_argument("--seuil-proximite", type=float, default=None,
+                           help="remplace le seuil d'abstention du noyau "
+                                "(cosinus, défaut noyau.recherche.SEUIL_PROXIMITE)")
     analyseur.add_argument("--k", type=int, default=K_PAR_DEFAUT)
     analyseur.add_argument("--questions", type=Path, default=banc.CHEMIN_QUESTIONS)
     analyseur.add_argument("--corpus", type=Path, default=banc.CHEMIN_CORPUS)
@@ -1363,7 +1371,7 @@ def principal(argv: Sequence[str] | None = None) -> int:
     # dans le banc.
     try:
         moteur, mode_recuperation = construire_moteur(options.recuperation,
-                                                      options.seuil_marge)
+                                                      options.seuil_proximite)
     except (module_dense.IndexAbsent, module_dense.ModeleAbsent) as manque:
         print(f"  {manque}", file=sys.stderr)
         return 2
@@ -1385,7 +1393,7 @@ def principal(argv: Sequence[str] | None = None) -> int:
         # produit, et l'inverse non plus.
         "production": (options.redacteur not in FACTICES
                        and options.recuperation == "reel"),
-        "seuil_marge": moteur.seuil_marge,
+        "seuil_proximite": moteur.seuil_proximite,
         "k": options.k,
     }
 
