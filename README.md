@@ -409,7 +409,7 @@ n'affiche un score comme une certitude.
 Sans clé, sans paquet, sans index — tout sauf la recherche dense réelle :
 
 ```sh
-git clone <l'adresse de ce dépôt> mizan
+git clone https://github.com/diffonathan/mizan.git
 cd mizan
 python -m unittest discover -s tests -t tests -q     # le compte s'imprime ici
 python evaluation/banc_bout_en_bout.py --recuperation idf
